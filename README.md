@@ -22,7 +22,7 @@ All text (summary, experience, skills, certificates, contact) is in [`src/data/p
 3. Under **Project → Settings → Environment Variables** add:
    - `GITHUB_WEBHOOK_SECRET`: a long random string (for example from a password generator).
    - `GITHUB_TOKEN` (optional): a GitHub token with no scopes, to avoid API rate limits.
-   - `NEXT_PUBLIC_SITE_URL` (optional): your final address, for example `https://jayasitumorang.vercel.app`.
+   - `SITE_URL` (optional): only if you use a custom domain. Otherwise the Vercel address is detected automatically.
 4. Redeploy once so the variables take effect.
 
 From then on, **every push to this repository deploys the site automatically**. That's Vercel's GitHub integration; nothing else to set up.

@@ -10,7 +10,12 @@ export const profile = {
   github: "jayasitumorang",
   summary:
     "I build web and mobile systems end to end: the screens people use, the services behind them, and the databases and cloud they run on. I've shipped for fintech, logistics, HR and enterprise teams, with a steady focus on performance, security and clean system design.",
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "https://jayasitumorang.vercel.app",
+  // Server-only. SITE_URL overrides; on Vercel the production address is detected automatically.
+  siteUrl:
+    process.env.SITE_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "http://localhost:3000"),
 };
 
 // GitHub repositories to leave out of the Projects section (exact repo names).
