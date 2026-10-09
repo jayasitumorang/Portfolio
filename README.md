@@ -41,6 +41,20 @@ The webhook tells the site to refresh the Projects section the moment you push t
 
 Personal GitHub accounts have webhooks per repository, not one for the whole account, so add it to the repositories you work on most. The other repositories still show up: the site refreshes all GitHub data every hour without a webhook.
 
+## Visitor log (Supabase)
+
+Each page view is stored in a Supabase table called `log_viewers`, and the numbers are on a private, password-protected page at `/stats`. No IP addresses are stored: each visitor gets an anonymous ID that changes every day.
+
+1. In Supabase, open **SQL Editor → New query**, paste [`supabase/log_viewers.sql`](supabase/log_viewers.sql) and click **Run**.
+2. In Supabase, open **Project Settings → API Keys** and create a **secret key** (`sb_secret_…`).
+3. In Vercel, open **Settings → Environment Variables** and add:
+   - `SUPABASE_URL`: `https://<project-id>.supabase.co`
+   - `SUPABASE_SECRET_KEY`: the secret key (mark it **Sensitive**)
+   - `STATS_PASSWORD`: a password for the stats page
+4. Redeploy. Visits now appear in Supabase → **Table Editor → log_viewers** and on `/stats`.
+
+To stop counting your own visits, open the site once with `?notrack` at the end of the address on each of your devices. `?track` turns counting back on.
+
 ## How it works
 
 | Piece | File |
@@ -50,3 +64,6 @@ Personal GitHub accounts have webhooks per repository, not one for the whole acc
 | Webhook (verifies GitHub's signature, then expires the cache) | `src/app/api/github-webhook/route.ts` |
 | Page | `src/app/page.tsx` |
 | Share preview image | `src/app/opengraph-image.tsx` |
+| Visitor tracking (browser → server → Supabase) | `src/components/Tracker.tsx`, `src/app/api/track/route.ts` |
+| Stats page | `src/app/stats/` |
+| Table definition | `supabase/log_viewers.sql` |

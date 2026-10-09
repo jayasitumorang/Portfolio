@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { themeScript } from "@/components/ThemeToggle";
+import { Tracker } from "@/components/Tracker";
 import { profile } from "@/data/profile";
 import "./globals.css";
 
@@ -38,7 +39,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Tracker />
+      </body>
     </html>
   );
 }
