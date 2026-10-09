@@ -1,4 +1,7 @@
+import Image from "next/image";
 import { cacheLife } from "next/cache";
+import profilePhoto from "@/assets/profile.jpg";
+import { ARField } from "@/components/ARField";
 import { CopyEmail } from "@/components/CopyEmail";
 import { GitHubSection } from "@/components/GitHubSection";
 import { StackDiagram } from "@/components/StackDiagram";
@@ -46,9 +49,23 @@ export default async function Home() {
       <main id="top">
         <section className="wrap hero">
           <div>
-            <span className="eyebrow">
-              <span className="dot" aria-hidden /> {profile.role} · {profile.location}
-            </span>
+            <div className="intro">
+              <span className="reticle">
+                <Image
+                  src={profilePhoto}
+                  alt={`Portrait of ${profile.name}`}
+                  className="avatar"
+                  width={96}
+                  height={96}
+                  quality={90}
+                  placeholder="blur"
+                  priority
+                />
+              </span>
+              <span className="eyebrow">
+                <span className="dot" aria-hidden /> {profile.role} · {profile.location}
+              </span>
+            </div>
             <h1>
               Jaya Pangihutan <span>Situmorang</span>
             </h1>
@@ -145,7 +162,7 @@ export default async function Home() {
           </div>
           <div className="ai-grid">
             {aiWork.map((a) => (
-              <article className="ai-card" key={a.title}>
+              <article className="ai-card" data-tilt="5" key={a.title}>
                 <div className="ai-flow mono">{a.pipeline}</div>
                 <h3>{a.title}</h3>
                 <p>{a.summary}</p>
@@ -196,7 +213,7 @@ export default async function Home() {
           </div>
           <div className="practices">
             {practices.map((p) => (
-              <div className="practice" key={p.title}>
+              <div className="practice" data-tilt="7" key={p.title}>
                 <h3>{p.title}</h3>
                 <p>{p.body}</p>
                 <div className="chips">
@@ -221,7 +238,7 @@ export default async function Home() {
             <p>Languages: {languages.join(", ")}.</p>
           </div>
           <div className="bg-grid">
-            <div className="panel">
+            <div className="panel" data-tilt="4">
               <span className="label">Education</span>
               <h3>{education.school}</h3>
               <div className="muted">
@@ -232,7 +249,7 @@ export default async function Home() {
               </div>
               <blockquote>Thesis: {education.thesis}</blockquote>
             </div>
-            <div className="panel">
+            <div className="panel" data-tilt="4">
               <span className="label">Speaking</span>
               {speaking.map((s) => (
                 <div key={s.event}>
@@ -245,7 +262,7 @@ export default async function Home() {
               <blockquote>Sharing what works on AWS with the Medan developer community.</blockquote>
             </div>
           </div>
-          <div className="panel" style={{ marginTop: 14 }}>
+          <div className="panel" data-tilt="2" style={{ marginTop: 14 }}>
             <span className="label">Certifications</span>
             <ul className="certs">
               {certifications.map((c) => (
@@ -283,6 +300,7 @@ export default async function Home() {
         </section>
       </main>
 
+      <ARField />
       <footer className="wrap footer">
         <span>
           © {year} {profile.name}

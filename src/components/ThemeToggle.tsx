@@ -25,12 +25,27 @@ function subscribe(onChange: () => void) {
 export function ThemeToggle() {
   const theme = useSyncExternalStore(subscribe, current, () => null);
 
-  function toggle() {
+  function toggle(e: React.MouseEvent<HTMLButtonElement>) {
     const next: Theme = current() === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    try {
-      localStorage.setItem("theme", next);
-    } catch {}
+    const apply = () => {
+      document.documentElement.dataset.theme = next;
+      try {
+        localStorage.setItem("theme", next);
+      } catch {}
+    };
+    if (!document.startViewTransition || matchMedia("(prefers-reduced-motion: reduce)").matches) return apply();
+
+    // Grow the new theme as a circle from the centre of the button.
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = r.left + r.width / 2;
+    const y = r.top + r.height / 2;
+    const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    document.startViewTransition(apply).ready.then(() => {
+      document.documentElement.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+        { duration: 700, easing: "cubic-bezier(.7,0,.3,1)", pseudoElement: "::view-transition-new(root)" },
+      );
+    });
   }
 
   const label = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";

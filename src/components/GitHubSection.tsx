@@ -30,7 +30,7 @@ export async function GitHubSection() {
         <div className="repos">
           {repos && repos.length > 0 ? (
             repos.map((r) => (
-              <a key={r.name} className="repo" href={r.html_url} target="_blank" rel="noopener noreferrer">
+              <a key={r.name} className="repo" data-tilt="8" href={r.html_url} target="_blank" rel="noopener noreferrer">
                 <span className="repo-name">{r.name}</span>
                 {r.description && <p>{r.description}</p>}
                 <span className="repo-meta">

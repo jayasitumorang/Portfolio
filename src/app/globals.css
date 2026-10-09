@@ -83,6 +83,11 @@ a { color: inherit; }
 }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 var(--ok); animation: pulse 2.4s infinite; flex: none; }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); } 70%, 100% { box-shadow: 0 0 0 8px transparent; } }
+.intro { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.avatar {
+  width: 96px; height: 96px; border-radius: 22px; object-fit: cover; object-position: 50% 30%;
+  border: 1px solid var(--line); box-shadow: var(--shadow), 0 0 0 4px var(--surface);
+}
 .hero h1 {
   font-family: var(--display); font-weight: 700; letter-spacing: -0.03em;
   font-size: clamp(42px, 6.6vw, 76px); line-height: 0.98; margin: 18px 0 20px; text-wrap: balance;
@@ -238,3 +243,169 @@ a { color: inherit; }
 /* Grid and flex children may shrink below their content width, so nothing pushes the page sideways on phones. */
 .hero > *, .gh-grid > *, .bg-grid > *, .role > *, .tool-row > *, .layer > * { min-width: 0; }
 body { overflow-x: clip; }
+
+/* =====================================================================
+   Motion. Everything is visible without it: scroll-driven effects only run
+   in browsers that support them, and nothing runs for reduced motion.
+   ===================================================================== */
+
+/* Theme switch: the new theme grows as a circle from the button (see ThemeToggle). */
+::view-transition-old(root),
+::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+
+/* The timeline rail exists everywhere; its fill is animated below. */
+.timeline { position: relative; }
+.timeline::before, .timeline::after {
+  content: ""; position: absolute; left: 194px; top: 0; bottom: 0; width: 2px; border-radius: 2px;
+}
+.timeline::before { background: var(--line); }
+.timeline::after { background: linear-gradient(var(--accent), var(--signal)); transform-origin: top; }
+@media (max-width: 720px) { .timeline::before, .timeline::after { display: none; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ---------- hero entrance (time-based, finishes in under a second) ---------- */
+  .hero > div > *, .hero .stack { animation: rise 0.8s cubic-bezier(.2,.7,.2,1) both; }
+  .hero > div > :nth-child(2) { animation-delay: 0.08s; }
+  .hero > div > :nth-child(3) { animation-delay: 0.16s; }
+  .hero > div > :nth-child(4) { animation-delay: 0.24s; }
+  .hero .stack { animation-name: rise-in; animation-delay: 0.3s; animation-duration: 1s; }
+  .avatar { animation: pop 0.9s cubic-bezier(.2,.9,.2,1.2) both; }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(28px); filter: blur(4px); } }
+  @keyframes rise-in { from { opacity: 0; transform: translateY(24px) scale(0.96) rotate(-1.2deg); } }
+  @keyframes pop { from { opacity: 0; transform: scale(0.6) rotate(-8deg); } }
+
+  .btn, .repo, .ai-card, .practice, .panel { transition: transform 0.25s cubic-bezier(.2,.7,.2,1), border-color 0.2s, box-shadow 0.25s; }
+  .ai-card:hover, .practice:hover, .panel:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); box-shadow: var(--shadow); }
+
+  @supports (animation-timeline: view()) {
+    /* ---------- reading progress under the nav ---------- */
+    .nav::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--signal));
+      transform-origin: left; animation: grow-x linear both; animation-timeline: scroll(root);
+    }
+
+    /* ---------- section transitions ---------- */
+    .section { position: relative; }
+    .section::before {
+      content: ""; position: absolute; top: 40px; left: 20px; right: 20px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent) 20%, var(--signal) 80%, transparent);
+      transform-origin: left; opacity: 0.7;
+      animation: grow-x linear both; animation-timeline: view(); animation-range: entry 0% entry 60%;
+    }
+    .sec-head .label { animation: slide-in linear both; animation-timeline: view(); animation-range: entry 10% cover 25%; }
+    .sec-head h2 { animation: wipe linear both; animation-timeline: view(); animation-range: entry 15% cover 30%; }
+    .sec-head p { animation: rise linear both; animation-timeline: view(); animation-range: entry 20% cover 32%; }
+
+    /* ---------- panels and cards rise in, staggered ---------- */
+    .role, .ai-card, .repo, .feed, .tool-row, .practice, .panel, .facts .fact {
+      animation: card-in linear both; animation-timeline: view(); animation-range: entry 0% cover 28%;
+    }
+    .ai-card:nth-child(2), .repo:nth-child(even), .practice:nth-child(2), .bg-grid .panel:nth-child(2), .facts .fact:nth-child(2) { animation-range: entry 8% cover 33%; }
+    .ai-card:nth-child(3), .practice:nth-child(3), .facts .fact:nth-child(3) { animation-range: entry 16% cover 38%; }
+    .practice:nth-child(4), .facts .fact:nth-child(4) { animation-range: entry 24% cover 43%; }
+    .role .chip, .ai-card .chip { animation: chip-in linear both; animation-timeline: view(); animation-range: entry 30% cover 40%; }
+
+    /* ---------- experience rail fills as you read ---------- */
+    .timeline { view-timeline-name: --career; }
+    .timeline::after { animation: grow-y linear both; animation-timeline: --career; animation-range: cover 15% cover 75%; }
+
+    /* ---------- contact panel opens up ---------- */
+    .contact { animation: open-up linear both; animation-timeline: view(); animation-range: entry 0% cover 40%; }
+    .contact h2 { animation: wipe linear both; animation-timeline: view(); animation-range: entry 30% cover 45%; }
+
+    @keyframes grow-x { from { transform: scaleX(0); } }
+    @keyframes grow-y { from { transform: scaleY(0); } }
+    @keyframes slide-in { from { opacity: 0; transform: translateX(-24px); } }
+    @keyframes wipe { from { clip-path: inset(0 100% 0 0); transform: translateY(12px); } to { clip-path: inset(0 -5% -10% 0); } }
+    @keyframes card-in { from { opacity: 0; transform: perspective(900px) translateY(60px) translateZ(-180px) rotateX(22deg); filter: blur(8px) saturate(1.6); } }
+    @keyframes chip-in { from { opacity: 0; transform: translateY(8px); } }
+    @keyframes open-up { from { opacity: 0.3; transform: scale(0.9); border-radius: 64px; } }
+  }
+}
+
+/* =====================================================================
+   AR layer: 3D tilt toward the pointer (ARField.tsx), holographic glare,
+   viewfinder corners, exploded stack, scanning portrait, AR floor grid.
+   ===================================================================== */
+:root { --grid: color-mix(in srgb, var(--accent) 16%, transparent); --holo: rgba(255, 255, 255, 0.55); }
+:root[data-theme="dark"] { --holo: rgba(160, 190, 255, 0.22); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --holo: rgba(160, 190, 255, 0.22); } }
+
+.hero, .ai-grid, .repos, .practices, .bg-grid, .background-certs { perspective: 1400px; }
+
+[data-tilt] { position: relative; transform-style: preserve-3d; transition: rotate 0.5s cubic-bezier(.2,.7,.2,1), border-color 0.2s, box-shadow 0.25s; }
+[data-tilt].is-tilting { transition: rotate 0.08s linear, border-color 0.2s, box-shadow 0.25s; box-shadow: var(--shadow), 0 30px 60px -30px color-mix(in srgb, var(--accent) 45%, transparent); }
+
+/* holographic glare that follows the pointer */
+[data-tilt]::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), var(--holo), transparent 45%),
+              linear-gradient(115deg, transparent 30%, color-mix(in srgb, var(--accent) 10%, transparent) 45%, color-mix(in srgb, var(--signal) 10%, transparent) 55%, transparent 70%);
+  opacity: 0; transition: opacity 0.3s; mix-blend-mode: soft-light;
+}
+[data-tilt].is-tilting::after { opacity: 1; }
+
+/* viewfinder corners on cards */
+.ai-card, .repo, .practice, .panel { --c: var(--accent); }
+.ai-card::before, .repo::before, .practice::before, .panel::before {
+  content: ""; position: absolute; inset: -6px; pointer-events: none; border-radius: 4px;
+  background:
+    linear-gradient(var(--c), var(--c)) top left / 16px 2px, linear-gradient(var(--c), var(--c)) top left / 2px 16px,
+    linear-gradient(var(--c), var(--c)) top right / 16px 2px, linear-gradient(var(--c), var(--c)) top right / 2px 16px,
+    linear-gradient(var(--c), var(--c)) bottom left / 16px 2px, linear-gradient(var(--c), var(--c)) bottom left / 2px 16px,
+    linear-gradient(var(--c), var(--c)) bottom right / 16px 2px, linear-gradient(var(--c), var(--c)) bottom right / 2px 16px;
+  background-repeat: no-repeat; opacity: 0; transform: scale(1.04) translateZ(30px); transition: opacity 0.25s, transform 0.35s cubic-bezier(.2,.7,.2,1);
+}
+.ai-card:hover::before, .repo:hover::before, .practice:hover::before, .panel:hover::before { opacity: 1; transform: scale(1) translateZ(30px); }
+
+/* card content floats slightly above the card surface while tilting */
+[data-tilt] > * { transition: translate 0.4s cubic-bezier(.2,.7,.2,1); }
+[data-tilt].is-tilting > * { translate: 0 0 24px; }
+
+/* exploded stack: layers separate in depth on hover / tilt */
+.stack, .stack-body { transform-style: preserve-3d; }
+.layer { background: var(--surface); transition: translate 0.5s cubic-bezier(.2,.7,.2,1), box-shadow 0.4s; }
+.stack.is-tilting .layer, .stack:hover .layer {
+  translate: 0 0 calc(var(--i, 0) * 22px + 20px);
+  box-shadow: 0 18px 30px -22px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.stack.is-tilting .stack-req, .stack.is-tilting .stack-res { translate: 0 0 12px; transition: translate 0.5s; }
+
+/* scanning portrait */
+.reticle { position: relative; display: inline-grid; padding: 7px; flex: none; }
+.reticle::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; --c: var(--accent);
+  background:
+    linear-gradient(var(--c), var(--c)) top left / 14px 2px, linear-gradient(var(--c), var(--c)) top left / 2px 14px,
+    linear-gradient(var(--c), var(--c)) top right / 14px 2px, linear-gradient(var(--c), var(--c)) top right / 2px 14px,
+    linear-gradient(var(--c), var(--c)) bottom left / 14px 2px, linear-gradient(var(--c), var(--c)) bottom left / 2px 14px,
+    linear-gradient(var(--c), var(--c)) bottom right / 14px 2px, linear-gradient(var(--c), var(--c)) bottom right / 2px 14px;
+  background-repeat: no-repeat;
+}
+.reticle::after {
+  content: ""; position: absolute; left: 7px; right: 7px; top: 7px; height: 26px; border-radius: 22px 22px 0 0; pointer-events: none;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--accent) 45%, transparent) 85%, var(--accent));
+  opacity: 0; mix-blend-mode: screen;
+}
+
+/* AR floor grid behind the hero */
+.hero { position: relative; isolation: isolate; }
+.hero::before {
+  content: ""; position: absolute; z-index: -1; left: -30%; right: -30%; bottom: 0; height: 75%; pointer-events: none;
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 56px 56px;
+  transform: perspective(520px) rotateX(64deg) translate(calc(var(--px, 0) * -40px), calc(var(--py, 0) * -20px));
+  transform-origin: 50% 100%;
+  mask-image: linear-gradient(to top, black 10%, transparent 85%);
+  -webkit-mask-image: linear-gradient(to top, black 10%, transparent 85%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero::before { animation: floor 6s linear infinite; }
+  @keyframes floor { to { background-position: 0 56px; } }
+  .reticle::after { animation: scan 3.2s cubic-bezier(.6,0,.4,1) infinite 1s; }
+  @keyframes scan { 0% { opacity: 0; transform: translateY(-10px); } 15% { opacity: 1; } 70% { opacity: 1; transform: translateY(70px); } 85%, 100% { opacity: 0; transform: translateY(70px); } }
+}
+@media (prefers-reduced-motion: reduce) { [data-tilt] { rotate: none !important; } }
