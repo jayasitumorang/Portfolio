@@ -1,4 +1,4 @@
-import { getActivity, getRepos } from "@/lib/github";
+import { getGitHub } from "@/lib/github";
 import { profile } from "@/data/profile";
 
 const LANG_COLORS: Record<string, string> = {
@@ -11,7 +11,7 @@ const fmt = (iso: string) =>
   new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(iso));
 
 export async function GitHubSection() {
-  const [repos, activity] = await Promise.all([getRepos(6), getActivity(6)]);
+  const { repos, activity, fetchedAt } = await getGitHub(6);
   const ghUrl = `https://github.com/${profile.github}`;
 
   return (
@@ -22,7 +22,7 @@ export async function GitHubSection() {
           <h2>Live from GitHub</h2>
         </div>
         <span className="live">
-          <span className="dot" aria-hidden /> Updates when I push · checked {fmt(new Date().toISOString())}
+          <span className="dot" aria-hidden /> Updates when I push · checked {fmt(fetchedAt)}
         </span>
       </div>
 
@@ -32,7 +32,7 @@ export async function GitHubSection() {
             repos.map((r) => (
               <a key={r.name} className="repo" href={r.html_url} target="_blank" rel="noopener noreferrer">
                 <span className="repo-name">{r.name}</span>
-                <p>{r.description ?? "No description yet."}</p>
+                {r.description && <p>{r.description}</p>}
                 <span className="repo-meta">
                   {r.language && (
                     <span className="lang">
@@ -74,7 +74,7 @@ export async function GitHubSection() {
             </ol>
           ) : (
             <p className="muted" style={{ margin: 0, fontSize: 14 }}>
-              No public activity in the last 90 days.
+              {activity ? "No public activity in the last 90 days." : "Activity is unavailable right now."}
             </p>
           )}
           <p style={{ margin: "14px 0 0", fontSize: 14 }}>

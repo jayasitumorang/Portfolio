@@ -13,6 +13,10 @@ export const profile = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "https://jayasitumorang.vercel.app",
 };
 
+// GitHub repositories to leave out of the Projects section (exact repo names).
+// Private repositories never appear. Add a description on GitHub to show one on the card.
+export const hiddenRepos: string[] = [];
+
 export type Role = {
   company: string;
   title: string;
@@ -76,6 +80,59 @@ export const experience: Role[] = [
   },
 ];
 
+// AI systems built as internal tools at work. Described by what I built and how,
+// with company names, internal systems, data and infrastructure left out on purpose.
+export type AIProject = {
+  title: string;
+  pipeline: string; // shown as a one-line flow
+  summary: string;
+  did: string[];
+  stack: string[];
+};
+
+export const aiWork: AIProject[] = [
+  {
+    title: "Private document assistant",
+    pipeline: "docs → chunks → embeddings → search → local LLM → answer",
+    summary:
+      "A chatbot that answers questions from an organisation's own manuals and policies, running entirely on self-hosted models so documents never leave the network.",
+    did: [
+      "Built the retrieval pipeline (RAG): text extraction from PDF, Word, Excel, PowerPoint, CSV and more, chunking, embeddings and semantic search",
+      "Admin panel to upload and remove documents, edit the bot's name, welcome message and system prompt, and review chat logs",
+      "Embeddable chat widget so any internal web page can host the assistant",
+      "Experimented with LoRA fine-tuning and documented when retrieval beats retraining",
+    ],
+    stack: ["Python", "FastAPI", "Ollama", "RAG", "Embeddings", "PostgreSQL", "Docker", "Nginx", "PyTorch", "PEFT / LoRA"],
+  },
+  {
+    title: "AI document reader",
+    pipeline: "PDF / image → OCR → LLM + JSON schema → structured data",
+    summary:
+      "Turns PDFs and scanned documents into clean, structured data, from resumes into candidate profiles to free-form requests like summarise, extract or translate.",
+    did: [
+      "Hybrid OCR: native PDF text first, with automatic Tesseract fallback for scanned pages in the same file",
+      "Schema-constrained LLM extraction with a cheap targeted retry when a key field comes back empty",
+      "Benchmarked several local models for accuracy against speed, and chose consistency over raw speed",
+      "Tuned the inference context size, which avoided a roughly 4x slowdown from the model spilling onto CPU",
+      "Admin page to switch models without redeploying, and a feature template so new tools plug in quickly, shipped with Docker and CI pipelines",
+    ],
+    stack: ["Python", "FastAPI", "Ollama", "Tesseract OCR", "PyMuPDF", "PostgreSQL", "Docker", "Azure Pipelines"],
+  },
+  {
+    title: "Computer vision training studio",
+    pipeline: "camera → label → train → test → deploy",
+    summary:
+      "An end-to-end web studio for building object detection and segmentation models: label images, train, test against a live camera, and deploy.",
+    did: [
+      "React web UI for live camera view, labelling and model testing",
+      "Python backend for project management, image processing, YOLO inference and contour masking",
+      "AI-assisted auto-annotation with Segment Anything (SAM) to cut manual labelling time",
+      "One-click run on Windows and auto-starting Linux service for server deployment",
+    ],
+    stack: ["Python", "FastAPI", "YOLO (Ultralytics)", "OpenCV", "SAM", "React", "Vite", "Linux / systemd"],
+  },
+];
+
 // The four layers of a full-stack system, used by the hero diagram and the toolbox.
 export const layers = [
   { id: "interface", label: "Interface", note: "web & mobile", items: ["React", "Next.js", "Vue.js", "React Native", "Angular", "TypeScript"] },
@@ -96,9 +153,9 @@ export const practices = [
     tags: ["Katalon Studio", "Automation"],
   },
   {
-    title: "AI integration",
-    body: "AI proofs of concept and API integration inside existing enterprise apps.",
-    tags: ["AI PoC", "LLM APIs"],
+    title: "Applied AI",
+    body: "Self-hosted LLMs, RAG, OCR pipelines and computer vision, wired into the apps teams already use.",
+    tags: ["Ollama", "RAG", "YOLO"],
   },
   {
     title: "IoT",
@@ -125,12 +182,12 @@ export const certifications = [
   { name: "AI Productivity and AI API Integration for Developers", issuer: "Hacktiv8", year: "2025" },
   { name: "Speaker Certificate, AWS User Group Medan Meetup", issuer: "AWS User Group Medan", year: "2025" },
   { name: "The Complete 2024 Web Development Bootcamp", issuer: null, year: "2021" },
-  { name: "React - The Complete Guide (incl. Next.js, Redux)", issuer: null, year: "2021" },
+  { name: "React - The Complete Guide 2024 (incl. Next.js, Redux)", issuer: null, year: "2021" },
   { name: "Certified Secure Computer User", issuer: null, year: "2021" },
   { name: "Problem Solving (Intermediate)", issuer: null, year: "2021" },
   { name: "SQL (Intermediate)", issuer: null, year: "2021" },
   { name: "TypeScript: The Complete Developer's Guide", issuer: null, year: null },
-  { name: "Angular - The Complete Guide", issuer: null, year: null },
+  { name: "Angular - The Complete Guide (2024 Edition)", issuer: null, year: null },
   { name: "Full Stack Java Developer", issuer: null, year: null },
 ];
 

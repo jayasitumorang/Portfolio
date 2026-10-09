@@ -1,17 +1,26 @@
+import { cacheLife } from "next/cache";
 import { CopyEmail } from "@/components/CopyEmail";
 import { GitHubSection } from "@/components/GitHubSection";
 import { StackDiagram } from "@/components/StackDiagram";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { certifications, education, experience, languages, layers, practices, profile, speaking } from "@/data/profile";
+import { aiWork, certifications, education, experience, languages, layers, practices, profile, speaking } from "@/data/profile";
 
 const month = (ym: string) =>
   new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${ym}-01T00:00:00Z`));
 
 const firstYear = Math.min(...experience.map((r) => Number(r.start.slice(0, 4))));
-const years = new Date().getUTCFullYear() - firstYear;
 const domains = Array.from(new Set(experience.map((r) => r.domain)));
 
-export default function Home() {
+// The current year, cached so the page can still be prerendered.
+async function currentYear() {
+  "use cache";
+  cacheLife("days");
+  return new Date().getUTCFullYear();
+}
+
+export default async function Home() {
+  const year = await currentYear();
+  const years = year - firstYear;
   return (
     <>
       <header className="nav">
@@ -22,6 +31,7 @@ export default function Home() {
           </a>
           <div className="nav-links">
             <a href="#work">Work</a>
+            <a href="#ai">AI</a>
             <a href="#projects">Projects</a>
             <a href="#stack">Stack</a>
             <a href="#background">Background</a>
@@ -115,6 +125,41 @@ export default function Home() {
                       </span>
                     ))}
                   </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* ---------- AI work ---------- */}
+        <section id="ai" className="section wrap">
+          <div className="sec-head">
+            <div>
+              <span className="label">AI work</span>
+              <h2>Self-hosted AI, built for real teams</h2>
+            </div>
+            <p>
+              Internal tools I designed and built on open-source models running on our own servers. Company names, data
+              and systems are left out on purpose.
+            </p>
+          </div>
+          <div className="ai-grid">
+            {aiWork.map((a) => (
+              <article className="ai-card" key={a.title}>
+                <div className="ai-flow mono">{a.pipeline}</div>
+                <h3>{a.title}</h3>
+                <p>{a.summary}</p>
+                <ul>
+                  {a.did.map((d) => (
+                    <li key={d}>{d}</li>
+                  ))}
+                </ul>
+                <div className="chips">
+                  {a.stack.map((t) => (
+                    <span className="chip" key={t}>
+                      {t}
+                    </span>
+                  ))}
                 </div>
               </article>
             ))}
@@ -240,7 +285,7 @@ export default function Home() {
 
       <footer className="wrap footer">
         <span>
-          © {new Date().getUTCFullYear()} {profile.name}
+          © {year} {profile.name}
         </span>
         <span>Built with Next.js · Deployed on Vercel · Projects synced from GitHub</span>
       </footer>

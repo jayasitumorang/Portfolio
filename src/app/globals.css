@@ -160,19 +160,29 @@ a { color: inherit; }
 .role p { margin: 10px 0 14px; max-width: 44em; }
 @media (max-width: 720px) { .role { grid-template-columns: 1fr; gap: 8px; } .role-when { flex-direction: row; flex-wrap: wrap; gap: 4px 12px; } }
 
+/* ---------- AI work ---------- */
+.ai-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.ai-card { display: flex; flex-direction: column; gap: 12px; padding: 22px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); min-width: 0; }
+.ai-flow { font-size: 11.5px; color: var(--accent); background: var(--accent-soft); padding: 7px 10px; border-radius: 8px; overflow-wrap: anywhere; line-height: 1.5; }
+.ai-card h3 { margin: 4px 0 0; font-family: var(--display); font-size: 22px; font-weight: 600; letter-spacing: -0.015em; }
+.ai-card p { margin: 0; color: var(--muted); font-size: 15px; }
+.ai-card ul { margin: 0 0 4px; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14.5px; flex: 1; }
+.ai-card li::marker { color: var(--accent); }
+@media (max-width: 960px) { .ai-grid { grid-template-columns: 1fr; } }
+
 /* ---------- github ---------- */
 .live { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
 .gh-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start; }
 .repos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .repo {
-  display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px;
+  display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px; min-height: 120px;
   background: var(--surface); border: 1px solid var(--line); text-decoration: none; min-width: 0;
   transition: border-color 0.15s, transform 0.15s;
 }
 .repo:hover { border-color: var(--accent); transform: translateY(-2px); }
 .repo-name { font-family: var(--mono); font-weight: 600; font-size: 15px; overflow-wrap: anywhere; }
 .repo p { margin: 0; color: var(--muted); font-size: 14.5px; flex: 1; }
-.repo-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.repo-meta { margin-top: auto; display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
 .lang { display: inline-flex; align-items: center; gap: 6px; }
 .lang i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .feed { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
@@ -224,3 +234,7 @@ a { color: inherit; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   html { scroll-behavior: auto; }
 }
+
+/* Grid and flex children may shrink below their content width, so nothing pushes the page sideways on phones. */
+.hero > *, .gh-grid > *, .bg-grid > *, .role > *, .tool-row > *, .layer > * { min-width: 0; }
+body { overflow-x: clip; }

@@ -1,10 +1,10 @@
 import "server-only";
-import { profile } from "@/data/profile";
+import { cacheLife, cacheTag } from "next/cache";
+import { hiddenRepos, profile } from "@/data/profile";
 
 // All GitHub data is cached under this tag. The webhook route expires it on push,
-// and it also refreshes on its own every REVALIDATE_SECONDS.
+// and the "hours" cache profile also refreshes it every hour on its own.
 export const GITHUB_TAG = "github";
-const REVALIDATE_SECONDS = 3600;
 const API = "https://api.github.com";
 
 export type Repo = {
@@ -19,14 +19,6 @@ export type Repo = {
   fork: boolean;
   archived: boolean;
   topics?: string[];
-};
-
-export type GitHubUser = {
-  login: string;
-  avatar_url: string;
-  html_url: string;
-  public_repos: number;
-  followers: number;
 };
 
 type RawEvent = {
@@ -48,10 +40,7 @@ async function gh<T>(path: string): Promise<T | null> {
   // Optional: a token raises the rate limit from 60 to 5000 requests per hour.
   if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   try {
-    const res = await fetch(`${API}${path}`, {
-      headers,
-      next: { revalidate: REVALIDATE_SECONDS, tags: [GITHUB_TAG] },
-    });
+    const res = await fetch(`${API}${path}`, { headers });
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
@@ -59,15 +48,12 @@ async function gh<T>(path: string): Promise<T | null> {
   }
 }
 
-export async function getUser() {
-  return gh<GitHubUser>(`/users/${profile.github}`);
-}
-
-export async function getRepos(limit = 6) {
+async function getRepos(limit: number) {
   const repos = await gh<Repo[]>(`/users/${profile.github}/repos?per_page=100&sort=pushed`);
   if (!repos) return null;
   return repos
     .filter((r) => !r.fork && !r.archived && r.name.toLowerCase() !== profile.github.toLowerCase())
+    .filter((r) => !hiddenRepos.some((h) => h.toLowerCase() === r.name.toLowerCase()))
     .sort((a, b) => Date.parse(b.pushed_at) - Date.parse(a.pushed_at))
     .slice(0, limit);
 }
@@ -94,7 +80,7 @@ function describe(e: RawEvent): string | null {
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-export async function getActivity(limit = 6) {
+async function getActivity(limit: number) {
   const events = await gh<RawEvent[]>(`/users/${profile.github}/events/public?per_page=30`);
   if (!events) return null;
   const out: Activity[] = [];
@@ -104,4 +90,13 @@ export async function getActivity(limit = 6) {
     if (out.length >= limit) break;
   }
   return out;
+}
+
+/** Repos + recent activity, cached together so one webhook refreshes both. */
+export async function getGitHub(limit = 6) {
+  "use cache";
+  cacheTag(GITHUB_TAG);
+  cacheLife("hours");
+  const [repos, activity] = await Promise.all([getRepos(limit), getActivity(limit)]);
+  return { repos, activity, fetchedAt: new Date().toISOString() };
 }

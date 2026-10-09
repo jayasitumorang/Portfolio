@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 
@@ -10,9 +10,20 @@ function current(): Theme {
   return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
+// Re-render when the OS theme changes or the toggle sets data-theme.
+function subscribe(onChange: () => void) {
+  const mq = matchMedia("(prefers-color-scheme: dark)");
+  const mo = new MutationObserver(onChange);
+  mq.addEventListener("change", onChange);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => {
+    mq.removeEventListener("change", onChange);
+    mo.disconnect();
+  };
+}
+
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme | null>(null);
-  useEffect(() => setTheme(current()), []);
+  const theme = useSyncExternalStore(subscribe, current, () => null);
 
   function toggle() {
     const next: Theme = current() === "dark" ? "light" : "dark";
@@ -20,7 +31,6 @@ export function ThemeToggle() {
     try {
       localStorage.setItem("theme", next);
     } catch {}
-    setTheme(next);
   }
 
   const label = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
