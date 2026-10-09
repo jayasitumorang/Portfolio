@@ -3,6 +3,7 @@ import { cacheLife } from "next/cache";
 import profilePhoto from "@/assets/profile.jpg";
 import { ARField } from "@/components/ARField";
 import { CopyEmail } from "@/components/CopyEmail";
+import { DayStory } from "@/components/DayStory";
 import { GitHubSection } from "@/components/GitHubSection";
 import { StackDiagram } from "@/components/StackDiagram";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -105,6 +106,8 @@ export default async function Home() {
             </div>
           </div>
         </div>
+
+        <DayStory />
 
         {/* ---------- experience ---------- */}
         <section id="work" className="section wrap">
