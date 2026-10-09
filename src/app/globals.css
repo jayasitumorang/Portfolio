@@ -233,6 +233,7 @@ a { color: inherit; }
 .contact .btn.ghost { background: transparent; color: var(--bg); border-color: color-mix(in srgb, var(--bg) 35%, transparent); }
 .email-line { font-family: var(--mono); font-size: clamp(16px, 2.6vw, 22px); margin-bottom: 22px; overflow-wrap: anywhere; }
 
+.privacy { flex-basis: 100%; margin: 4px 0 0; font-size: 12px; max-width: 70em; }
 .footer { padding-block: 36px 48px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; font-size: 13px; color: var(--muted); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -462,7 +463,7 @@ body { overflow-x: clip; }
 .as-table th, .recent th { font-size: 11.5px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
 .as-table td + td, .as-table th + th { text-align: right; font-variant-numeric: tabular-nums; }
 .table-scroll { overflow-x: auto; }
-.recent { min-width: 640px; margin-top: 0; }
+.recent { min-width: 760px; margin-top: 0; }
 
 /* ranked lists: label, bar, value */
 .rank-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }

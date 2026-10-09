@@ -52,7 +52,7 @@ export async function loadStats(): Promise<Stats | { error: string } | null> {
   for (let from = 0; from < 50_000; from += 1000) {
     const { data, error } = await db
       .from(VISITOR_TABLE)
-      .select("created_at,path,referrer,source,country,city,device,browser,os,visitor_id")
+      .select("created_at,path,referrer,source,country,city,device,browser,os,visitor_id,ip_address")
       .gte("created_at", since)
       .order("created_at", { ascending: false })
       .range(from, from + 999);

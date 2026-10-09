@@ -187,6 +187,7 @@ function Dashboard({ s }: { s: Stats }) {
                   <th>Time (WIB)</th>
                   <th>Page</th>
                   <th>Location</th>
+                  <th>IP address</th>
                   <th>Source</th>
                   <th>Device</th>
                 </tr>
@@ -197,6 +198,7 @@ function Dashboard({ s }: { s: Stats }) {
                     <td className="mono">{when(r.created_at)}</td>
                     <td className="mono">{r.path}</td>
                     <td>{[r.city, countryName(r.country)].filter(Boolean).join(", ") || "Unknown"}</td>
+                    <td className="mono">{r.ip_address ?? "–"}</td>
                     <td>{r.source}</td>
                     <td>
                       {r.device} · {r.browser} on {r.os}

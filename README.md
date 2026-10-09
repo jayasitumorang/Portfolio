@@ -43,7 +43,7 @@ Personal GitHub accounts have webhooks per repository, not one for the whole acc
 
 ## Visitor log (Supabase)
 
-Each page view is stored in a Supabase table called `log_viewers`, and the numbers are on a private, password-protected page at `/stats`. No IP addresses are stored: each visitor gets an anonymous ID that changes every day.
+Each page view is stored in a Supabase table called `log_viewers`, including the visitor's IP address, and the numbers are on a private, password-protected page at `/stats`. Because IP addresses are personal data, the site footer carries a short privacy note; keep it.
 
 1. In Supabase, open **SQL Editor → New query**, paste [`supabase/log_viewers.sql`](supabase/log_viewers.sql) and click **Run**.
 2. In Supabase, open **Project Settings → API Keys** and create a **secret key** (`sb_secret_…`).

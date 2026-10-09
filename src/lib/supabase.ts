@@ -22,4 +22,5 @@ export type ViewRow = {
   browser: string | null;
   os: string | null;
   visitor_id: string;
+  ip_address: string | null;
 };

@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
+import { isIP } from "node:net";
 import { supabaseAdmin, VISITOR_TABLE } from "@/lib/supabase";
 import { browser, device, isBot, os, source } from "@/lib/visitor";
 
 // Receives one page view from the visitor's browser (Tracker.tsx) and stores it in Supabase.
-// No IP address is stored: visitor_id is a salted hash that changes every day.
+// The IP address is stored for analytics and security; visitor_id is a salted daily hash for unique counts.
 
 const str = (v: unknown, max: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null);
 
@@ -52,6 +53,7 @@ export async function POST(req: Request) {
     device: device(ua),
     browser: browser(ua),
     os: os(ua),
+    ip_address: isIP(ip) ? ip : null,
     visitor_id: createHash("sha256").update(`${salt}|${day}|${ip}|${ua}`).digest("hex").slice(0, 16),
   });
   if (error) console.error(`${VISITOR_TABLE} insert failed: ${error.message}`);

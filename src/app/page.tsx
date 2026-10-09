@@ -306,6 +306,10 @@ export default async function Home() {
           © {year} {profile.name}
         </span>
         <span>Built with Next.js · Deployed on Vercel · Projects synced from GitHub</span>
+        <p className="privacy">
+          Privacy: this site logs each visit (page, time, approximate location, device, referring site and IP address) to
+          see how people find it. The data is never sold or shared. To have yours removed, email {profile.email}.
+        </p>
       </footer>
     </>
   );
