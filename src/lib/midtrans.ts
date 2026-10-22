@@ -23,14 +23,22 @@ async function call<T>(path: string, init?: { method: "POST"; body: unknown }): 
     body: init ? JSON.stringify(init.body) : undefined,
     cache: "no-store",
   });
-  const json = (await res.json().catch(() => ({}))) as T & { status_code?: string; status_message?: string };
-  if (!res.ok) throw new Error(`Midtrans ${res.status}: ${json.status_message ?? "request failed"}`);
+  const json = (await res.json().catch(() => ({}))) as T & {
+    status_code?: string;
+    status_message?: string;
+    validation_messages?: string[];
+  };
+  if (!res.ok) {
+    const detail = [json.status_message ?? "request failed", ...(json.validation_messages ?? [])].join("; ");
+    throw new Error(`Midtrans ${res.status}: ${detail}`);
+  }
   return json;
 }
 
 export type MidtransTx = {
   status_code: string;
   status_message?: string;
+  validation_messages?: string[];
   transaction_id?: string;
   order_id: string;
   gross_amount: string;
@@ -64,7 +72,10 @@ export async function chargeQris(o: {
       custom_expiry: { expiry_duration: o.minutes, unit: "minute" },
     },
   });
-  if (tx.status_code !== "201") throw new Error(`Midtrans ${tx.status_code}: ${tx.status_message ?? "charge failed"}`);
+  if (tx.status_code !== "201") {
+    const detail = [tx.status_message ?? "charge failed", ...(tx.validation_messages ?? [])].join("; ");
+    throw new Error(`Midtrans ${tx.status_code}: ${detail}`);
+  }
   return tx;
 }
 

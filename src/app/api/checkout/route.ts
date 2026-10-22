@@ -94,7 +94,8 @@ export async function POST(req: Request) {
   } catch (e) {
     console.error(`checkout ${orderId}: ${(e as Error).message}`);
     await db.from(ORDER_TABLE).update({ status: "failed", updated_at: new Date().toISOString() }).eq("order_id", orderId);
-    return json({ error: "QRIS gagal dibuat. Coba lagi." }, 502);
+    // Midtrans messages carry no secrets and make a failed setup diagnosable from the page.
+    return json({ error: `QRIS gagal dibuat. Coba lagi. (${(e as Error).message})` }, 502);
   }
 
   return json({ token });
