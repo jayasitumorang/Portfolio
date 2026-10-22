@@ -11,6 +11,8 @@ export async function POST(req: Request) {
   } catch {
     return new Response("Bad request", { status: 400 });
   }
+  // Not one of our book orders (e.g. the dashboard's "Test notification URL"): acknowledge and ignore.
+  if (typeof n.order_id !== "string" || !n.order_id.startsWith("BOOK-")) return new Response("OK (ignored)");
   if (!validSignature(n)) return new Response("Invalid signature", { status: 403 });
 
   try {
