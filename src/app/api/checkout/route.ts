@@ -1,12 +1,12 @@
 import { randomBytes } from "node:crypto";
 import { isIP } from "node:net";
 import { books } from "@/data/books";
-import { chargeQris, midtransReady } from "@/lib/midtrans";
+import { createSnap, midtransReady } from "@/lib/midtrans";
 import { ORDER_TABLE, supabaseAdmin } from "@/lib/supabase";
 import { device } from "@/lib/visitor";
 
-// Starts a direct book sale: creates the order, asks Midtrans for a QRIS code and returns the
-// secret token for the buyer's order page (/order#token).
+// Starts a direct book sale: creates the order, opens a Midtrans Snap payment for it and returns
+// the secret token for the buyer's order page (/order#token), where Snap is embedded.
 
 const EXPIRY_MINUTES = 15;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -72,21 +72,20 @@ export async function POST(req: Request) {
   }
 
   try {
-    const tx = await chargeQris({
+    const snap = await createSnap({
       orderId,
       amount: book.price,
       item: { id: book.slug, name: book.title },
       email,
       name,
       minutes: EXPIRY_MINUTES,
+      finishUrl: `${origin}/order#${token}`,
     });
-    const qr = tx.actions?.find((a) => a.name === "generate-qr-code")?.url ?? null;
     await db
       .from(ORDER_TABLE)
       .update({
-        transaction_id: tx.transaction_id ?? null,
         payment_type: "qris",
-        qr_url: qr,
+        qr_url: snap.url, // Snap payment page; the order page embeds it
         expires_at: new Date(Date.now() + EXPIRY_MINUTES * 60_000).toISOString(),
         updated_at: new Date().toISOString(),
       })

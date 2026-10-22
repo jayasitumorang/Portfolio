@@ -886,7 +886,6 @@ kbd {
 .ticket-body p { margin: 0; }
 .ticket-loading { flex-direction: row; align-items: center; color: var(--muted); }
 
-.qr-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
 .qr-frame { position: relative; padding: 14px; border-radius: 22px; background: #fff; box-shadow: 0 20px 40px -24px rgba(0,0,0,.4); overflow: hidden; }
 .qr-frame::before {
   content: ""; position: absolute; inset: 6px; pointer-events: none; --c: var(--glow, var(--accent));
@@ -897,13 +896,6 @@ kbd {
     linear-gradient(var(--c), var(--c)) bottom right / 26px 3px, linear-gradient(var(--c), var(--c)) bottom right / 3px 26px;
   background-repeat: no-repeat;
 }
-.qr-frame .qr { display: block; width: min(240px, 60vw); height: auto; }
-.qr-scan {
-  position: absolute; left: 14px; right: 14px; top: 14px; height: 40px; pointer-events: none;
-  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--glow, var(--accent)) 45%, transparent) 90%, var(--glow, var(--accent)));
-  animation: qr-scan 2.6s cubic-bezier(.6,0,.4,1) infinite; mix-blend-mode: multiply;
-}
-@keyframes qr-scan { 0% { transform: translateY(-40px); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(240px); opacity: 0; } }
 .countdown { position: relative; width: 112px; height: 112px; display: grid; place-items: center; align-content: center; text-align: center; }
 .countdown svg { position: absolute; inset: 0; transform: rotate(-90deg); }
 .countdown circle { fill: none; stroke-width: 5; }
@@ -912,6 +904,15 @@ kbd {
 .countdown.low .bar { stroke: #d2335a; }
 .countdown span { font-size: 22px; font-weight: 700; line-height: 1; }
 .countdown small { font-size: 11px; color: var(--muted); }
+.pay-top { display: flex; align-items: center; gap: 18px; width: 100%; }
+.pay-top-text { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.snap-frame { width: 100%; min-height: 220px; padding: 10px; display: grid; }
+.snap-frame.is-ready { min-height: 560px; }
+.snap-frame > div, .snap-frame iframe { width: 100% !important; min-width: 0; border: 0; border-radius: 14px; }
+.snap-frame.is-ready::before { display: none; }
+.snap-note { grid-area: 1 / 1; place-self: center; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 24px; margin: 0; text-align: center; color: #5b6170; }
+p.snap-note { flex-direction: row; }
+.snap-note .muted { color: #5b6170; max-width: 34ch; }
 .order-wait { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
 .order-wait .dot { background: var(--signal); animation: pulse 1.6s infinite; }
 
@@ -941,7 +942,9 @@ kbd {
   .ticket-book { width: 90px; }
   .ticket-title { flex: 1; min-width: 0; text-align: left; }
   .ticket-body { padding: 24px 20px; }
-  .qr-wrap { justify-content: center; width: 100%; }
+  .pay-top { gap: 12px; }
+  .pay-top .countdown { width: 88px; height: 88px; flex: none; }
+  .snap-frame { padding: 4px; }
 }
 
 .daily td + td, .daily th + th { text-align: right; font-variant-numeric: tabular-nums; }

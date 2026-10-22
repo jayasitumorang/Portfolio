@@ -1,6 +1,7 @@
+import { snapClient, snapToken } from "@/lib/midtrans";
 import { findByToken, refresh } from "@/lib/orders";
 
-// Order status for the buyer's order page, which polls it while the QR code is open.
+// Order status for the buyer's order page, which polls it while the Snap payment is open.
 export async function GET(_req: Request, ctx: RouteContext<"/api/orders/[token]">) {
   const { token } = await ctx.params;
   const found = await findByToken(token);
@@ -15,7 +16,7 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/orders/[token]"
       slug: o.book_slug,
       amount: o.amount,
       email: o.email,
-      qr: o.status === "pending" ? o.qr_url : null,
+      pay: o.status === "pending" && o.qr_url ? { url: o.qr_url, token: snapToken(o.qr_url), ...snapClient() } : null,
       expiresAt: o.expires_at,
       paidAt: o.paid_at,
     },

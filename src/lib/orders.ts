@@ -48,7 +48,14 @@ export async function refresh(order: OrderRow) {
   if (order.status !== "pending") return order;
   try {
     return (await applyTransaction(await getStatus(order.order_id))) ?? order;
-  } catch {
-    return order; // Midtrans answers 404 until the QR is scanned in some cases; keep waiting
+  } catch (e) {
+    // Midtrans answers 404 until the buyer opens QRIS in Snap. If they never do, no notification ever
+    // comes, so a pending order past its expiry (plus a little slack) is expired here.
+    const stale = order.expires_at && Date.parse(order.expires_at) + 2 * 60_000 < Date.now();
+    if (!stale || !(e as Error).message.startsWith("Midtrans 404")) return order;
+    const db = supabaseAdmin();
+    const patch = { status: "expired" as const, updated_at: new Date().toISOString() };
+    await db?.from(ORDER_TABLE).update(patch).eq("order_id", order.order_id).eq("status", "pending");
+    return { ...order, ...patch };
   }
 }

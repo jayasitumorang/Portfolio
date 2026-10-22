@@ -2,7 +2,7 @@
 
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { BuySteps, WALLETS } from "@/components/BuyButton";
 
 function subscribeHash(onChange: () => void) {
@@ -16,10 +16,18 @@ type Order = {
   slug: string;
   amount: number;
   email: string;
-  qr: string | null;
+  pay: Pay | null;
   expiresAt: string | null;
   paidAt: string | null;
 };
+
+type Pay = { url: string; token: string | null; clientKey: string | null; production: boolean };
+
+declare global {
+  interface Window {
+    snap?: { embed: (token: string, opts: { embedId: string; onSuccess?: () => void; onPending?: () => void }) => void };
+  }
+}
 
 export type BookLook = { cover: StaticImageData; glow: string; spine: string; subtitle: string };
 
@@ -33,7 +41,7 @@ const QR_MINUTES = 15;
 // The buyer's order page. The secret token sits in the URL hash, so it never reaches server logs
 // or the visitor log; the page polls the order until it is paid, expired or failed.
 export function OrderStatus({ looks }: { looks: Record<string, BookLook> }) {
-  const hash = useSyncExternalStore(subscribeHash, () => location.hash.slice(1), () => null);
+  const hash = useSyncExternalStore(subscribeHash, () => location.hash.slice(1).split(/[?&]/)[0], () => null);
   const token = hash && /^[a-f0-9]{48}$/.test(hash) ? hash : null;
   const [order, setOrder] = useState<Order | null>(null);
   const [notFound, setNotFound] = useState(false);
@@ -140,29 +148,23 @@ export function OrderStatus({ looks }: { looks: Record<string, BookLook> }) {
         {order.status === "pending" && (
           <>
             <h1>
-              Scan untuk bayar <span className="amount">{rupiah(order.amount)}</span>
+              Bayar <span className="amount">{rupiah(order.amount)}</span> pakai QRIS
             </h1>
-            <p className="muted">Buka aplikasi e-wallet atau m-banking, pilih scan QRIS, lalu arahkan ke kode ini.</p>
-            <div className="qr-wrap">
-              <div className="qr-frame">
-                {order.qr ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- Midtrans serves the QR image
-                  <img className="qr" src={order.qr} alt={`QRIS ${rupiah(order.amount)} untuk ${order.book}`} width={260} height={260} />
-                ) : (
-                  <p className="form-error">QR belum tersedia. Muat ulang halaman ini.</p>
-                )}
-                <span className="qr-scan" aria-hidden />
-              </div>
+            <p className="muted">Pilih QRIS di bawah, lalu scan dengan e-wallet atau m-banking. Halaman ini update otomatis.</p>
+            <div className="pay-top">
               {left !== null && <Countdown left={left} />}
+              <div className="pay-top-text">
+                <ul className="wallets" aria-label="Bisa dibayar dengan">
+                  {WALLETS.map((w) => (
+                    <li key={w}>{w}</li>
+                  ))}
+                </ul>
+                <p className="order-wait mono">
+                  <span className="dot" aria-hidden /> Menunggu pembayaran
+                </p>
+              </div>
             </div>
-            <ul className="wallets" aria-label="Bisa dibayar dengan">
-              {WALLETS.map((w) => (
-                <li key={w}>{w}</li>
-              ))}
-            </ul>
-            <p className="order-wait mono">
-              <span className="dot" aria-hidden /> Menunggu pembayaran, halaman ini update otomatis
-            </p>
+            {order.pay ? <SnapPay pay={order.pay} /> : <p className="form-error">Pembayaran belum tersedia. Muat ulang halaman ini.</p>}
             <p className="muted small">Simpan tautan halaman ini. Setelah bayar, tombol unduh muncul di sini.</p>
           </>
         )}
@@ -213,6 +215,67 @@ export function OrderStatus({ looks }: { looks: Record<string, BookLook> }) {
         )}
       </div>
     </div>
+  );
+}
+
+const SNAP_ID = "snap-pay";
+
+/**
+ * Midtrans Snap embedded in the ticket, styled like the QR frame. Without a client key, or if the
+ * embed fails, it falls back to a button that opens Midtrans's own payment page.
+ */
+function SnapPay({ pay }: { pay: Pay }) {
+  const [state, setState] = useState<"loading" | "ready" | "fallback">(pay.clientKey && pay.token ? "loading" : "fallback");
+  const started = useRef<string | null>(null);
+
+  useEffect(() => {
+    const { clientKey, token, production } = pay;
+    if (!clientKey || !token || started.current === token) return;
+    started.current = token;
+    const embed = () => {
+      try {
+        window.snap!.embed(token, { embedId: SNAP_ID });
+        setState("ready");
+      } catch {
+        setState("fallback");
+      }
+    };
+    if (window.snap) return embed();
+    const script = document.createElement("script");
+    script.src = `https://app${production ? "" : ".sandbox"}.midtrans.com/snap/snap.js`;
+    script.dataset.clientKey = clientKey;
+    script.onload = embed;
+    script.onerror = () => setState("fallback");
+    document.head.appendChild(script);
+  }, [pay]);
+
+  return (
+    <>
+      <div className={`qr-frame snap-frame is-${state}`}>
+        <div id={SNAP_ID} />
+        {state === "loading" && (
+          <p className="snap-note">
+            <span className="spin" aria-hidden /> Menyiapkan QRIS…
+          </p>
+        )}
+        {state === "fallback" && (
+          <div className="snap-note">
+            <p className="muted">QRIS dibuka di halaman pembayaran Midtrans. Setelah bayar, kamu kembali ke sini.</p>
+            <a className="btn buy-submit" href={pay.url}>
+              Buka QRIS →
+            </a>
+          </div>
+        )}
+      </div>
+      {state === "ready" && (
+        <p className="muted small">
+          QRIS tidak muncul?{" "}
+          <a href={pay.url}>
+            Buka di halaman Midtrans
+          </a>
+        </p>
+      )}
+    </>
   );
 }
 

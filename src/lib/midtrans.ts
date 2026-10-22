@@ -2,20 +2,22 @@ import "server-only";
 import { createHash, timingSafeEqual } from "node:crypto";
 import type { OrderStatus } from "@/lib/supabase";
 
-// Midtrans Core API, QRIS only. Docs: https://docs.midtrans.com/reference/gopay-1
-// Charged as GoPay: its QR is QRIS, so any QRIS app can pay it, and it works on accounts where
-// payment_type "qris" is not enabled for the Core API.
+// Midtrans: Snap creates the payment (QRIS via GoPay), the Core API reads its status back.
+// Docs: https://docs.midtrans.com/docs/snap-snap-integration-guide
 // MIDTRANS_IS_PRODUCTION=true switches from the sandbox to live payments.
 
-const base = () =>
-  process.env.MIDTRANS_IS_PRODUCTION === "true" ? "https://api.midtrans.com" : "https://api.sandbox.midtrans.com";
+const production = () => process.env.MIDTRANS_IS_PRODUCTION === "true";
+const host = (sub: "api" | "app") => `https://${sub}${production() ? "" : ".sandbox"}.midtrans.com`;
 
 export const midtransReady = () => !!process.env.MIDTRANS_SERVER_KEY;
 
-async function call<T>(path: string, init?: { method: "POST"; body: unknown }): Promise<T> {
+/** What the buyer's browser needs to embed Snap; the client key is public by design. */
+export const snapClient = () => ({ clientKey: process.env.MIDTRANS_CLIENT_KEY || null, production: production() });
+
+async function call<T>(url: string, init?: { method: "POST"; body: unknown }): Promise<T> {
   const key = process.env.MIDTRANS_SERVER_KEY;
   if (!key) throw new Error("MIDTRANS_SERVER_KEY is not set");
-  const res = await fetch(`${base()}${path}`, {
+  const res = await fetch(url, {
     method: init?.method ?? "GET",
     headers: {
       Accept: "application/json",
@@ -29,10 +31,11 @@ async function call<T>(path: string, init?: { method: "POST"; body: unknown }): 
     status_code?: string;
     status_message?: string;
     validation_messages?: string[];
+    error_messages?: string[];
   };
   if (!res.ok) {
-    const detail = [json.status_message ?? "request failed", ...(json.validation_messages ?? [])].join("; ");
-    throw new Error(`Midtrans ${res.status}: ${detail}`);
+    const detail = [json.status_message ?? "request failed", ...(json.validation_messages ?? []), ...(json.error_messages ?? [])];
+    throw new Error(`Midtrans ${res.status}: ${detail.join("; ")}`);
   }
   return json;
 }
@@ -54,33 +57,38 @@ export type MidtransTx = {
   actions?: { name: string; method: string; url: string }[];
 };
 
-/** Creates a QRIS payment (GoPay QR) that expires after `minutes`. */
-export async function chargeQris(o: {
+/**
+ * Creates a Snap payment limited to QRIS (GoPay's QR is QRIS, so any QRIS app can pay it) that
+ * expires after `minutes`. Snap only offers the methods that are active on the Midtrans account.
+ */
+export async function createSnap(o: {
   orderId: string;
   amount: number;
   item: { id: string; name: string };
   email: string;
   name: string | null;
   minutes: number;
+  finishUrl: string;
 }) {
-  const tx = await call<MidtransTx>("/v2/charge", {
+  const snap = await call<{ token?: string; redirect_url?: string }>(`${host("app")}/snap/v1/transactions`, {
     method: "POST",
     body: {
-      payment_type: "gopay",
       transaction_details: { order_id: o.orderId, gross_amount: o.amount },
       item_details: [{ id: o.item.id, price: o.amount, quantity: 1, name: o.item.name.slice(0, 50) }],
       customer_details: { email: o.email, first_name: o.name ?? undefined },
-      custom_expiry: { expiry_duration: o.minutes, unit: "minute" },
+      enabled_payments: ["gopay", "other_qris"],
+      expiry: { unit: "minute", duration: o.minutes },
+      callbacks: { finish: o.finishUrl },
     },
   });
-  if (tx.status_code !== "201") {
-    const detail = [tx.status_message ?? "charge failed", ...(tx.validation_messages ?? [])].join("; ");
-    throw new Error(`Midtrans ${tx.status_code}: ${detail}`);
-  }
-  return tx;
+  if (!snap.token || !snap.redirect_url) throw new Error("Midtrans Snap: no token in response");
+  return { token: snap.token, url: snap.redirect_url };
 }
 
-export const getStatus = (orderId: string) => call<MidtransTx>(`/v2/${encodeURIComponent(orderId)}/status`);
+/** The Snap token is the last segment of its redirect URL, which is what the order row keeps. */
+export const snapToken = (url: string) => url.split("/").pop() || null;
+
+export const getStatus = (orderId: string) => call<MidtransTx>(`${host("api")}/v2/${encodeURIComponent(orderId)}/status`);
 
 /** Checks the signature_key Midtrans puts on every notification. */
 export function validSignature(n: { order_id?: string; status_code?: string; gross_amount?: string; signature_key?: string }) {
