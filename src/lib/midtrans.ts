@@ -2,7 +2,9 @@ import "server-only";
 import { createHash, timingSafeEqual } from "node:crypto";
 import type { OrderStatus } from "@/lib/supabase";
 
-// Midtrans Core API, QRIS only. Docs: https://docs.midtrans.com/reference/qris
+// Midtrans Core API, QRIS only. Docs: https://docs.midtrans.com/reference/gopay-1
+// Charged as GoPay: its QR is QRIS, so any QRIS app can pay it, and it works on accounts where
+// payment_type "qris" is not enabled for the Core API.
 // MIDTRANS_IS_PRODUCTION=true switches from the sandbox to live payments.
 
 const base = () =>
@@ -52,7 +54,7 @@ export type MidtransTx = {
   actions?: { name: string; method: string; url: string }[];
 };
 
-/** Creates a QRIS payment that expires after `minutes`. */
+/** Creates a QRIS payment (GoPay QR) that expires after `minutes`. */
 export async function chargeQris(o: {
   orderId: string;
   amount: number;
@@ -64,11 +66,10 @@ export async function chargeQris(o: {
   const tx = await call<MidtransTx>("/v2/charge", {
     method: "POST",
     body: {
-      payment_type: "qris",
+      payment_type: "gopay",
       transaction_details: { order_id: o.orderId, gross_amount: o.amount },
       item_details: [{ id: o.item.id, price: o.amount, quantity: 1, name: o.item.name.slice(0, 50) }],
       customer_details: { email: o.email, first_name: o.name ?? undefined },
-      qris: { acquirer: "gopay" },
       custom_expiry: { expiry_duration: o.minutes, unit: "minute" },
     },
   });
