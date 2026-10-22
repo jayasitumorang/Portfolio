@@ -13,6 +13,9 @@ export type Book = {
   hook: string;
   cover: StaticImageData;
   url: string;
+  // direct sale over QRIS (IDR); the EPUB lives in the private Supabase bucket "books"
+  price: number;
+  file: string;
   pages: number;
   // spine and glow colors, picked from the cover
   spine: string;
@@ -31,6 +34,8 @@ export const books: Book[] = [
       "Arga (39), IT Manager yang hidupnya cuma berisi server, tiket, dan kopi sachet. Cuti menumpuk 47 hari, dan cinta belum masuk roadmap. Sampai Sekar, Business Analyst baru yang ceria, membuat tiket prioritas CRITICAL: \"Unit Arga belum makan sejak pagi.\" Romansa kantor yang hangat, lucu, dan menyentuh tentang kelelahan kerja, duka, dan kesempatan kedua.",
     cover: error404Cover,
     url: "https://play.google.com/store/books/details?id=NkMbEgAAQBAJ",
+    price: 35000,
+    file: "error-404.epub",
     pages: 119,
     spine: "#1b2a4e",
     glow: "#f5b84a",
@@ -50,6 +55,8 @@ export const books: Book[] = [
       "Jaya Pratama baru saja berjanji akan membaca semua instruksi sebelum menekan tombol. Satu menit kemudian, ia terdaftar di Statistik kelas Jumat pukul tujuh pagi. Lalu ia satu kelompok dengan Nadira, teman sekelas yang membuat satu pesan sederhana butuh tiga kali revisi. Komedi romantis tentang orang-orang yang belum sepenuhnya siap, tapi mulai berani datang.",
     cover: krsCover,
     url: "https://play.google.com/store/books/details?id=uaYdEgAAQBAJ",
+    price: 35000,
+    file: "krs-kopi.epub",
     pages: 120,
     spine: "#2c5f9e",
     glow: "#f4a6b8",

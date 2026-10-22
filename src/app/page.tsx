@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cacheLife } from "next/cache";
 import { ARField } from "@/components/ARField";
+import { BuyButton } from "@/components/BuyButton";
 import { SiteNav } from "@/components/SiteNav";
 import { books } from "@/data/books";
 import { profile } from "@/data/profile";
@@ -16,6 +17,8 @@ async function currentYear() {
 // Landing page: who I am in one line, my novels, and the way into the portfolio.
 export default async function Home() {
   const year = await currentYear();
+  // Direct QRIS sales show up once Midtrans is configured (env vars are read at build time).
+  const selling = !!process.env.MIDTRANS_SERVER_KEY;
   const quotes = books.flatMap((b) => b.quotes.map((q) => ({ ...q, book: b.title })));
 
   return (
@@ -127,6 +130,7 @@ export default async function Home() {
                       </svg>
                       Read on Google Play Books
                     </a>
+                    {selling && <BuyButton slug={b.slug} title={b.title} price={b.price} />}
                   </div>
                   <ul className="novel-quotes">
                     {b.quotes.map((q) => (

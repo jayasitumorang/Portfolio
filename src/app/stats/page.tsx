@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { signIn, signOut } from "./actions";
 import { isSignedIn } from "./auth";
+import type { OrderRow } from "@/lib/supabase";
 import { countryName, DAYS, loadStats, TZ, type Ranked, type Stats } from "./data";
 
 export const metadata: Metadata = { title: "Visitor stats", robots: { index: false, follow: false } };
@@ -167,6 +168,8 @@ function Dashboard({ s }: { s: Stats }) {
         </details>
       </section>
 
+      <SalesSection sales={s.sales} />
+
       <div className="rank-grid">
         <RankCard title="Countries" items={s.countries} total={s.views} />
         <RankCard title="Sources" items={s.sources} total={s.views} />
@@ -210,6 +213,131 @@ function Dashboard({ s }: { s: Stats }) {
           </div>
         ) : (
           <p className="muted">No visits yet. Share your link and check back.</p>
+        )}
+      </section>
+    </>
+  );
+}
+
+const rupiah = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
+const STATUS_LABEL: Record<OrderRow["status"], string> = {
+  paid: "Paid",
+  pending: "Pending",
+  expired: "Expired",
+  failed: "Failed",
+  refunded: "Refunded",
+};
+
+function SalesSection({ sales }: { sales: Stats["sales"] }) {
+  if ("error" in sales) {
+    return (
+      <section className="chart-card">
+        <h2>Book sales</h2>
+        <p className="muted">
+          Could not read orders: {sales.error}. If the table is missing, run <code>supabase/book_orders.sql</code> in the
+          Supabase SQL Editor.
+        </p>
+      </section>
+    );
+  }
+  const days = [...sales.days].reverse();
+  return (
+    <>
+      <div className="tiles">
+        <div className="tile">
+          <span>Revenue (paid)</span>
+          <b>{rupiah(sales.revenue)}</b>
+        </div>
+        <div className="tile">
+          <span>Books sold</span>
+          <b>{sales.paid}</b>
+        </div>
+        <div className="tile">
+          <span>Open QRIS orders</span>
+          <b>{sales.pending}</b>
+        </div>
+        <div className="tile">
+          <span>Sales per 100 visitors</span>
+          <b>{sales.conversion}</b>
+        </div>
+      </div>
+
+      <section className="chart-card">
+        <div className="chart-title">
+          <h2>Visits and transactions per day</h2>
+          <span className="muted">Newest first · also in Supabase as the view daily_visits_transactions</span>
+        </div>
+        <div className="table-scroll">
+          <table className="recent daily">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Views</th>
+                <th>Visitors</th>
+                <th>Orders</th>
+                <th>Paid</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {days.map((d) => (
+                <tr key={d.key} className={d.views || d.orders ? undefined : "quiet"}>
+                  <td>{shortDay(d.key)}</td>
+                  <td>{d.views}</td>
+                  <td>{d.visitors}</td>
+                  <td>{d.orders}</td>
+                  <td>{d.paid}</td>
+                  <td>{d.revenue ? rupiah(d.revenue) : "–"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="chart-card">
+        <div className="chart-title">
+          <h2>Recent transactions</h2>
+          <span className="muted">QRIS via Midtrans · newest first</span>
+        </div>
+        {sales.recent.length ? (
+          <div className="table-scroll">
+            <table className="recent">
+              <thead>
+                <tr>
+                  <th>Time (WIB)</th>
+                  <th>Order</th>
+                  <th>Book</th>
+                  <th>Buyer</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Paid with</th>
+                  <th>Downloads</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sales.recent.map((o) => (
+                  <tr key={o.order_id}>
+                    <td className="mono">{when(o.created_at)}</td>
+                    <td className="mono">{o.order_id}</td>
+                    <td>{o.book_title}</td>
+                    <td>
+                      {o.name ? `${o.name} · ` : ""}
+                      {o.email}
+                    </td>
+                    <td className="mono">{rupiah(o.amount)}</td>
+                    <td>
+                      <span className={`pill ${o.status}`}>{STATUS_LABEL[o.status]}</span>
+                    </td>
+                    <td>{o.issuer ?? o.payment_type ?? "–"}</td>
+                    <td className="mono">{o.downloads}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="muted">No orders yet.</p>
         )}
       </section>
     </>

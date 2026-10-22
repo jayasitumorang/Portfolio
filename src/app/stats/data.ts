@@ -1,5 +1,5 @@
 import "server-only";
-import { supabaseAdmin, VISITOR_TABLE, type ViewRow } from "@/lib/supabase";
+import { ORDER_TABLE, supabaseAdmin, VISITOR_TABLE, type OrderRow, type ViewRow } from "@/lib/supabase";
 
 export const DAYS = 30;
 export const TZ = "Asia/Jakarta"; // WIB, Medan's time zone
@@ -19,6 +19,16 @@ export type Stats = {
   browsers: Ranked;
   pages: Ranked;
   recent: ViewRow[];
+  sales: Sales | { error: string };
+};
+
+export type Sales = {
+  revenue: number;
+  paid: number;
+  pending: number;
+  conversion: number; // paid orders per 100 unique visitors
+  days: { key: string; views: number; visitors: number; orders: number; paid: number; revenue: number }[];
+  recent: OrderRow[];
 };
 
 function rank(rows: ViewRow[], pick: (r: ViewRow) => string | null, limit = 6): Ranked {
@@ -78,7 +88,42 @@ export async function loadStats(): Promise<Stats | { error: string } | null> {
   const series = days.map((d) => ({ key: d.key, views: d.views, visitors: d.ids.size }));
   const activeDays = series.filter((d) => d.views > 0).length || 1;
 
+  // Book sales over the same window, merged with the visits per day.
+  let sales: Sales | { error: string };
+  const { data: orderData, error: orderError } = await db
+    .from(ORDER_TABLE)
+    .select("created_at,order_id,book_slug,book_title,amount,email,name,status,payment_type,issuer,paid_at,downloads,country,device")
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(5000);
+  if (orderError) {
+    sales = { error: orderError.message };
+  } else {
+    const orders = (orderData ?? []) as OrderRow[];
+    const paidOrders = orders.filter((o) => o.status === "paid");
+    const perDay = new Map(series.map((d) => [d.key, { ...d, orders: 0, paid: 0, revenue: 0 }]));
+    for (const o of orders) {
+      const d = perDay.get(dayKey.format(new Date(o.created_at)));
+      if (!d) continue;
+      d.orders++;
+      if (o.status === "paid") {
+        d.paid++;
+        d.revenue += o.amount;
+      }
+    }
+    const visitors = series.reduce((s, d) => s + d.visitors, 0);
+    sales = {
+      revenue: paidOrders.reduce((s, o) => s + o.amount, 0),
+      paid: paidOrders.length,
+      pending: orders.filter((o) => o.status === "pending").length,
+      conversion: visitors ? Math.round((paidOrders.length / visitors) * 1000) / 10 : 0,
+      days: [...perDay.values()],
+      recent: orders.slice(0, 25),
+    };
+  }
+
   return {
+    sales,
     days: series,
     views: rows.length,
     visitorsToday: series[series.length - 1].visitors,
