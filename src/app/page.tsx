@@ -130,7 +130,7 @@ export default async function Home() {
                       </svg>
                       Read on Google Play Books
                     </a>
-                    {selling && <BuyButton slug={b.slug} title={b.title} price={b.price} />}
+                    {selling && <BuyButton slug={b.slug} title={b.title} subtitle={b.subtitle} price={b.price} cover={b.cover} glow={b.glow} spine={b.spine} />}
                   </div>
                   <ul className="novel-quotes">
                     {b.quotes.map((q) => (
