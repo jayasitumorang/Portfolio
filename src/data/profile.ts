@@ -4,7 +4,7 @@ export const profile = {
   name: "Jaya Pangihutan Situmorang",
   shortName: "Jaya Situmorang",
   initials: "JS",
-  role: "Full-Stack Engineer",
+  role: "Full-Stack & AI Engineer",
   location: "Medan, Indonesia",
   email: "jayasitumorang19@gmail.com",
   github: "jayasitumorang",
@@ -41,9 +41,9 @@ export const experience: Role[] = [
     end: null,
     domain: "Enterprise AI",
     summary:
-      "Design and build internal AI tools: an enterprise data agent in Copilot Studio grounded in SQL Server data, plus self-hosted tools on open-source models (a private RAG document assistant, an OCR and LLM document reader, and a computer vision training studio), shipped with Docker and CI pipelines.",
-    stack: ["Copilot Studio", "Python", "FastAPI", "Ollama", "RAG", "YOLO", "SQL Server", "Docker", "Azure Pipelines"],
-    wins: ["Promoted to a higher grade in April 2026", "Took AI work from proof of concept to tools teams use"],
+      "Design and build internal AI tools: live computer vision for worker safety, weighbridge checks and fruit bunch counting; an enterprise data agent in Copilot Studio grounded in SQL Server data; and self-hosted LLM tools on a vLLM and Ollama GPU server (RAG assistant, OCR document reader, vision training studio), shipped with Docker and CI pipelines.",
+    stack: ["Python", "YOLO", "OpenCV", "Copilot Studio", "vLLM", "Ollama", "RAG", "SQL Server", "Docker", "Azure Pipelines"],
+    wins: ["Promoted to a higher grade", "Took AI work from proof of concept to tools teams use"],
   },
   {
     company: "PT. Wilmar Consultancy Services",
@@ -118,10 +118,56 @@ export type AIProject = {
   did: string[];
   stack: string[];
   latest?: boolean; // featured full-width with a "Latest" badge
+  live?: boolean; // runs on live camera feeds; shows a pulsing LIVE tag on the screenshot
+  // Anonymised screenshot in public/ai: company names, addresses and file names cropped or blurred.
+  image?: { src: string; width: number; height: number; alt: string };
 };
 
 // Newest first. The 3D walk shows the first three.
 export const aiWork: AIProject[] = [
+  {
+    title: "Worker safety vision",
+    pipeline: "CCTV → detection + pose → rope & helmet rules → live safety status",
+    summary:
+      "Watches a tanker unloading line in real time and checks that every worker on top of a truck wears a helmet and is clipped to a safety rope.",
+    did: [
+      "Detects trucks, workers, helmets, ropes and anchor blocks, and uses pose keypoints to tie each rope to the worker wearing it",
+      "Rule engine marks every person safe or unsafe and drives a live status panel, for example \"SAFE: all workers roped\"",
+      "Sleep timer idles the model between activity to save GPU time",
+      "Runs live at about 7 fps per camera, with an online/offline camera monitor",
+    ],
+    stack: ["Python", "YOLO (Ultralytics)", "Pose estimation", "OpenCV", "IoT"],
+    latest: true,
+    live: true,
+    image: { src: "/ai/safety.jpg", width: 934, height: 561, alt: "Live camera view with boxes on a truck, a worker, a helmet and a safety rope, and a status panel reading SAFE" },
+  },
+  {
+    title: "Weighbridge AI monitor",
+    pipeline: "4 cameras → ZeroMQ stream → detection → 6 weighing checks → dashboard",
+    summary:
+      "Checks every weighing automatically, so a truck is only weighed when the bridge is clear and the truck is stopped fully on the platform.",
+    did: [
+      "Streams several camera feeds over ZeroMQ into one live panel per weighbridge",
+      "Six checks per weighing: crossing clearance, object clear, truck movement, stop position, bridge clear and truck in position",
+      "Health bar for CPU, RAM, GPU, temperature and storage, with auto reset and one-click AI restart",
+    ],
+    stack: ["Python", "ZeroMQ", "Object detection", "OpenCV", "Web dashboard"],
+    live: true,
+    image: { src: "/ai/weighbridge.jpg", width: 680, height: 480, alt: "Two weighbridge camera panels, each listing six checks that all read True" },
+  },
+  {
+    title: "Fruit bunch counter",
+    pipeline: "harvest photos → cloud storage watcher → detection model → count + trend",
+    summary:
+      "Counts fresh fruit bunches in harvest photos as they arrive in cloud storage, replacing manual tallies with a live total.",
+    did: [
+      "Storage watcher picks up new photos from Azure Blob Storage and counts bunches automatically",
+      "Custom-trained detection model reports a count and confidence for every photo, with count, label and mask views",
+      "Daily total, monthly trend and model retraining cycle on one dashboard",
+    ],
+    stack: ["Python", "YOLO", "Azure Blob Storage", "OpenCV", "Dashboard"],
+    image: { src: "/ai/ffb.jpg", width: 1400, height: 507, alt: "Counting dashboard with a large daily total, a live model preview and recent photos with counts" },
+  },
   {
     title: "Enterprise data agent",
     pipeline: "question → Copilot agent (GPT-4.1) → SQL Server data → grounded answer",
@@ -135,7 +181,7 @@ export const aiWork: AIProject[] = [
       "Replies in the user's language, Indonesian or English",
     ],
     stack: ["Copilot Studio", "GPT-4.1", "Python", "SQL Server", "Prompt engineering"],
-    latest: true,
+    image: { src: "/ai/copilot.jpg", width: 1010, height: 926, alt: "Copilot Studio agent settings with GPT-4.1 selected and grounding instructions" },
   },
   {
     title: "Private document assistant",
@@ -147,9 +193,9 @@ export const aiWork: AIProject[] = [
       "Admin panel to upload and remove documents, edit the bot's name, welcome message and system prompt, and review chat logs",
       "Embeddable chat widget so any internal web page can host the assistant",
       "Experimented with LoRA fine-tuning and documented when retrieval beats retraining",
+      "Serves the models from a self-hosted GPU server with vLLM and Ollama",
     ],
-    stack: ["Python", "FastAPI", "Ollama", "RAG", "Embeddings", "PostgreSQL", "Docker", "Nginx", "PyTorch", "PEFT / LoRA"],
-  },
+    stack: ["Python", "FastAPI", "vLLM", "Ollama", "RAG", "Embeddings", "PostgreSQL", "Docker", "Nginx", "PyTorch", "PEFT / LoRA"],  },
   {
     title: "AI document reader",
     pipeline: "PDF / image → OCR → LLM + JSON schema → structured data",

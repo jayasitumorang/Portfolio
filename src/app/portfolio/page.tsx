@@ -15,6 +15,8 @@ const month = (ym: string) =>
 const firstYear = Math.min(...experience.map((r) => Number(r.start.slice(0, 4))));
 const domains = Array.from(new Set(experience.map((r) => r.domain)));
 const companies = new Set(experience.map((r) => r.company)).size;
+// Tools for the scrolling ticker under the facts; listed twice so the loop has no seam.
+const ticker = Array.from(new Set([...aiWork.flatMap((a) => a.stack), ...layers.flatMap((l) => l.items)]));
 
 // The current year, cached so the page can still be prerendered.
 async function currentYear() {
@@ -104,6 +106,14 @@ export default async function Portfolio() {
           </div>
         </div>
 
+        <div className="marquee" aria-hidden>
+          <div className="marquee-track mono">
+            {[...ticker, ...ticker].map((t, i) => (
+              <span key={i}>{t}</span>
+            ))}
+          </div>
+        </div>
+
         {/* ---------- AI work ---------- */}
         <section id="ai" className="section wrap">
           <div className="sec-head">
@@ -119,25 +129,37 @@ export default async function Portfolio() {
           <div className="ai-grid">
             {aiWork.map((a) => (
               <article className={a.latest ? "ai-card latest" : "ai-card"} data-tilt={a.latest ? "2" : "5"} key={a.title}>
-                {a.latest && (
-                  <span className="now">
-                    <span className="dot" aria-hidden /> Latest
-                  </span>
+                {a.image && (
+                  <figure className="ai-shot">
+                    <Image src={a.image.src} alt={a.image.alt} width={a.image.width} height={a.image.height} sizes="(max-width: 960px) 100vw, 560px" />
+                    {a.live && (
+                      <span className="live-tag mono">
+                        <span className="dot" aria-hidden /> LIVE
+                      </span>
+                    )}
+                  </figure>
                 )}
-                <div className="ai-flow mono">{a.pipeline}</div>
-                <h3>{a.title}</h3>
-                <p>{a.summary}</p>
-                <ul>
-                  {a.did.map((d) => (
-                    <li key={d}>{d}</li>
-                  ))}
-                </ul>
-                <div className="chips">
-                  {a.stack.map((t) => (
-                    <span className="chip" key={t}>
-                      {t}
+                <div className="ai-body">
+                  {a.latest && (
+                    <span className="now">
+                      <span className="dot" aria-hidden /> Latest
                     </span>
-                  ))}
+                  )}
+                  <div className="ai-flow mono">{a.pipeline}</div>
+                  <h3>{a.title}</h3>
+                  <p>{a.summary}</p>
+                  <ul>
+                    {a.did.map((d) => (
+                      <li key={d}>{d}</li>
+                    ))}
+                  </ul>
+                  <div className="chips">
+                    {a.stack.map((t) => (
+                      <span className="chip" key={t}>
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </article>
             ))}

@@ -277,6 +277,10 @@ kbd {
   font-size: clamp(42px, 6.6vw, 76px); line-height: 0.98; margin: 18px 0 20px; text-wrap: balance;
 }
 .hero h1 span { color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) {
+  .hero h1 span { background: linear-gradient(100deg, var(--accent) 0%, var(--accent) 35%, var(--signal) 50%, var(--accent) 65%, var(--accent) 100%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 5s ease-in-out infinite; }
+  @keyframes shimmer { from { background-position: 100% 0; } to { background-position: -150% 0; } }
+}
 .lede { font-size: 18.5px; color: var(--muted); max-width: 34em; margin: 0 0 28px; }
 .ctas { display: flex; flex-wrap: wrap; gap: 10px; }
 @media (max-width: 880px) { .hero { grid-template-columns: 1fr; padding-block: 48px 40px; } }
@@ -350,9 +354,54 @@ kbd {
 .ai-card h3 { margin: 4px 0 0; font-family: var(--display); font-size: 22px; font-weight: 600; letter-spacing: -0.015em; }
 .ai-card p { margin: 0; color: var(--muted); font-size: 15px; }
 .ai-card ul { margin: 0 0 4px; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14.5px; flex: 1; }
-.ai-card li::marker { color: var(--accent); }
-.ai-card.latest { grid-column: 1 / -1; border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: linear-gradient(135deg, var(--accent-soft), var(--surface) 55%); }
-.ai-card.latest ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(22em, 100%), 1fr)); gap: 6px 40px; }
+.ai-card ul { list-style: none; padding-left: 0; }
+.ai-card li { position: relative; padding-left: 18px; }
+.ai-card li::before { content: ""; position: absolute; left: 2px; top: 0.62em; width: 6px; height: 6px; border-radius: 2px; background: var(--accent); }
+.ai-body { display: flex; flex-direction: column; gap: 12px; flex: 1; min-width: 0; }
+.ai-card.latest { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start; gap: 26px; border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: linear-gradient(135deg, var(--accent-soft), var(--surface) 55%); }
+.ai-card.latest .ai-body { order: -1; }
+@media (max-width: 960px) { .ai-card.latest { grid-template-columns: 1fr; } .ai-card.latest .ai-body { order: 0; } }
+
+/* screenshot with a scanning line, like the detection overlays in the tools themselves */
+.ai-shot { position: relative; margin: -8px -8px 0; border-radius: 11px; overflow: hidden; border: 1px solid var(--line); background: #0b1018; aspect-ratio: 16 / 9; }
+.ai-card.latest .ai-shot { margin: 0; aspect-ratio: 5 / 3; }
+.ai-shot img { width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block; transition: transform 0.7s cubic-bezier(.2,.7,.2,1), filter 0.4s; filter: saturate(0.9); }
+.ai-card:hover .ai-shot img { transform: scale(1.06); filter: saturate(1.1); }
+.ai-shot::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--ok) 0%, transparent) 42%, color-mix(in srgb, var(--ok) 38%, transparent) 50%, transparent 51%),
+              repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 3px);
+  background-size: 100% 220%, auto; background-position: 0 120%, 0 0;
+}
+.live-tag { position: absolute; top: 10px; left: 10px; display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: #fff; background: rgba(10, 14, 21, 0.72); backdrop-filter: blur(6px); }
+.live-tag .dot { background: #ff4d4f; }
+
+@property --spin { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
+/* tool ticker under the facts */
+.marquee { overflow: hidden; margin-top: 26px; padding-block: 12px; border-block: 1px solid var(--line); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.marquee-track { display: flex; width: max-content; font-size: 13px; color: var(--muted); }
+.marquee-track span { white-space: nowrap; padding-right: 34px; }
+.marquee-track span::before { content: "◆"; margin-right: 34px; color: var(--accent); opacity: 0.6; font-size: 9px; vertical-align: 2px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ai-shot::after { animation: scan 3.6s linear infinite; }
+  .ai-card:nth-child(2n) .ai-shot::after { animation-delay: -1.4s; }
+  .live-tag .dot { animation: blink 1.2s ease-in-out infinite; }
+  .marquee-track { animation: ticker 60s linear infinite; }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+
+  /* featured card: a light runs around its border */
+  .ai-card.latest { border-color: transparent; background:
+      linear-gradient(135deg, color-mix(in srgb, var(--accent) 9%, var(--surface)), var(--surface) 55%) padding-box,
+      conic-gradient(from var(--spin), var(--line) 0deg, var(--accent) 60deg, var(--signal) 110deg, var(--line) 170deg, var(--line) 360deg) border-box;
+    animation: spin 6s linear infinite; }
+
+  @keyframes scan { from { background-position: 0 120%, 0 0; } to { background-position: 0 -120%, 0 0; } }
+  @keyframes blink { 50% { opacity: 0.25; } }
+  @keyframes ticker { to { transform: translateX(-50%); } }
+  @keyframes spin { to { --spin: 360deg; } }
+}
 @media (max-width: 960px) { .ai-grid { grid-template-columns: 1fr; } }
 
 /* ---------- github ---------- */
