@@ -1964,7 +1964,7 @@ export function CareerWalk({ repos }: { repos: RepoLite[] | null }) {
         <p>{profile.summary}</p>
         <h2>Experience</h2>
         {experience.map((r) => (
-          <article key={r.company}>
+          <article key={r.title + r.company}>
             <h3>
               {r.company}: {r.title} ({period(r)}, {r.domain})
             </h3>

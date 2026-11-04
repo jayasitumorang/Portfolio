@@ -36,13 +36,24 @@ export type Role = {
 export const experience: Role[] = [
   {
     company: "PT. Wilmar Consultancy Services",
-    title: "Full-Stack Engineer",
+    title: "Full-Stack Engineer · TechDev AI",
+    start: "2023-04",
+    end: null,
+    domain: "Enterprise AI",
+    summary:
+      "Design and build internal AI tools: an enterprise data agent in Copilot Studio grounded in SQL Server data, plus self-hosted tools on open-source models (a private RAG document assistant, an OCR and LLM document reader, and a computer vision training studio), shipped with Docker and CI pipelines.",
+    stack: ["Copilot Studio", "Python", "FastAPI", "Ollama", "RAG", "YOLO", "SQL Server", "Docker", "Azure Pipelines"],
+    wins: ["Promoted to a higher grade in April 2026", "Took AI work from proof of concept to tools teams use"],
+  },
+  {
+    company: "PT. Wilmar Consultancy Services",
+    title: "Full-Stack Engineer · TechDev",
     start: "2023-04",
     end: null,
     domain: "Enterprise",
     summary:
-      "Maintain and extend enterprise systems from user requirements: the Terminal Warehouse (TWMS) and Packaging Management (PMS) systems on Java Spring and RabbitMQ, and the HR System, e-Recruitment and Face Absence Management on ASP.NET. Built AI agents and self-hosted AI tools, desktop and IoT apps, and resolved VAPT security findings.",
-    stack: [".NET", "Java Spring", "RabbitMQ", "Python", "Copilot Studio", "SQL Server", "Next.js", "Kotlin", "AWS", "Azure DevOps"],
+      "Maintain and extend enterprise systems from user requirements: the Terminal Warehouse (TWMS) and Packaging Management (PMS) systems on Java Spring and RabbitMQ, and the HR System, e-Recruitment and Face Absence Management on ASP.NET. Built desktop and IoT apps and resolved VAPT security findings.",
+    stack: [".NET", "Java Spring", "RabbitMQ", "SQL Server", "Next.js", "Kotlin", "AWS", "Azure DevOps"],
     wins: [
       "Closed Jira tickets ahead of target",
       "Upgraded systems from legacy stacks to new ones",

@@ -14,6 +14,7 @@ const month = (ym: string) =>
 
 const firstYear = Math.min(...experience.map((r) => Number(r.start.slice(0, 4))));
 const domains = Array.from(new Set(experience.map((r) => r.domain)));
+const companies = new Set(experience.map((r) => r.company)).size;
 
 // The current year, cached so the page can still be prerendered.
 async function currentYear() {
@@ -89,7 +90,7 @@ export default async function Portfolio() {
               <span>building production software</span>
             </div>
             <div className="fact">
-              <b>{experience.length} teams</b>
+              <b>{companies} teams</b>
               <span>{domains.join(", ")}</span>
             </div>
             <div className="fact">
@@ -151,13 +152,13 @@ export default async function Portfolio() {
               <h2>Where I&apos;ve shipped</h2>
             </div>
             <p>
-              {experience.length} teams across {domains.length} industries, most recently enterprise systems and AI at
-              Wilmar.
+              {companies} teams across fintech, logistics, EdTech, GovTech and enterprise, most recently enterprise systems
+              and AI at Wilmar.
             </p>
           </div>
           <div className="timeline">
             {experience.map((r) => (
-              <article className="role" key={r.company}>
+              <article className="role" key={r.title + r.company}>
                 <div className="role-when">
                   <span>
                     {month(r.start)} – {r.end ? month(r.end) : "now"}
