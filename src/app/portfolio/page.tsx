@@ -34,8 +34,8 @@ export default async function Portfolio() {
 
       <main id="top" className="page classic">
         <nav className="wrap jump" aria-label="Sections">
-          <a href="#work">Work</a>
           <a href="#ai">AI</a>
+          <a href="#work">Work</a>
           <a href="#projects">Projects</a>
           <a href="#stack">Stack</a>
           <a href="#background">Background</a>
@@ -71,7 +71,10 @@ export default async function Portfolio() {
               <a className="btn" href={`https://github.com/${profile.github}`} target="_blank" rel="noopener noreferrer">
                 GitHub
               </a>
-              <a className="btn" href="#work">
+              <a className="btn" href="/cv-jaya-situmorang.pdf" download>
+                Download CV
+              </a>
+              <a className="btn" href="#ai">
                 See my work
               </a>
             </div>
@@ -100,6 +103,46 @@ export default async function Portfolio() {
           </div>
         </div>
 
+        {/* ---------- AI work ---------- */}
+        <section id="ai" className="section wrap">
+          <div className="sec-head">
+            <div>
+              <span className="label">AI work</span>
+              <h2>AI built for real teams</h2>
+            </div>
+            <p>
+              Internal AI tools I designed and built, from agents grounded in company data to open-source models running on
+              our own servers. Company names, data and systems are left out on purpose.
+            </p>
+          </div>
+          <div className="ai-grid">
+            {aiWork.map((a) => (
+              <article className={a.latest ? "ai-card latest" : "ai-card"} data-tilt={a.latest ? "2" : "5"} key={a.title}>
+                {a.latest && (
+                  <span className="now">
+                    <span className="dot" aria-hidden /> Latest
+                  </span>
+                )}
+                <div className="ai-flow mono">{a.pipeline}</div>
+                <h3>{a.title}</h3>
+                <p>{a.summary}</p>
+                <ul>
+                  {a.did.map((d) => (
+                    <li key={d}>{d}</li>
+                  ))}
+                </ul>
+                <div className="chips">
+                  {a.stack.map((t) => (
+                    <span className="chip" key={t}>
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
         {/* ---------- experience ---------- */}
         <section id="work" className="section wrap">
           <div className="sec-head">
@@ -107,7 +150,10 @@ export default async function Portfolio() {
               <span className="label">Experience</span>
               <h2>Where I&apos;ve shipped</h2>
             </div>
-            <p>Five teams across five industries, most recently enterprise systems at Wilmar.</p>
+            <p>
+              {experience.length} teams across {domains.length} industries, most recently enterprise systems and AI at
+              Wilmar.
+            </p>
           </div>
           <div className="timeline">
             {experience.map((r) => (
@@ -129,6 +175,13 @@ export default async function Portfolio() {
                     <span className="domain">{r.domain}</span>
                   </div>
                   <p>{r.summary}</p>
+                  {r.wins && (
+                    <ul className="wins">
+                      {r.wins.map((w) => (
+                        <li key={w}>{w}</li>
+                      ))}
+                    </ul>
+                  )}
                   <div className="chips">
                     {r.stack.map((t) => (
                       <span className="chip" key={t}>
@@ -136,41 +189,6 @@ export default async function Portfolio() {
                       </span>
                     ))}
                   </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        {/* ---------- AI work ---------- */}
-        <section id="ai" className="section wrap">
-          <div className="sec-head">
-            <div>
-              <span className="label">AI work</span>
-              <h2>Self-hosted AI, built for real teams</h2>
-            </div>
-            <p>
-              Internal tools I designed and built on open-source models running on our own servers. Company names, data
-              and systems are left out on purpose.
-            </p>
-          </div>
-          <div className="ai-grid">
-            {aiWork.map((a) => (
-              <article className="ai-card" data-tilt="5" key={a.title}>
-                <div className="ai-flow mono">{a.pipeline}</div>
-                <h3>{a.title}</h3>
-                <p>{a.summary}</p>
-                <ul>
-                  {a.did.map((d) => (
-                    <li key={d}>{d}</li>
-                  ))}
-                </ul>
-                <div className="chips">
-                  {a.stack.map((t) => (
-                    <span className="chip" key={t}>
-                      {t}
-                    </span>
-                  ))}
                 </div>
               </article>
             ))}

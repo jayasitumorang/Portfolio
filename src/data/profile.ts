@@ -9,7 +9,7 @@ export const profile = {
   email: "jayasitumorang19@gmail.com",
   github: "jayasitumorang",
   summary:
-    "I build web and mobile systems end to end: the screens people use, the services behind them, and the databases and cloud they run on. I've shipped for fintech, logistics, HR and enterprise teams, with a steady focus on performance, security and clean system design.",
+    "I build web and mobile systems end to end: the screens people use, the services behind them, and the databases and cloud they run on. I've shipped for fintech, logistics, HR and enterprise teams, and lately I build AI agents and self-hosted AI tools that answer from a company's own data.",
   // Server-only. SITE_URL overrides; on Vercel the production address is detected automatically.
   siteUrl:
     process.env.SITE_URL ??
@@ -30,6 +30,7 @@ export type Role = {
   domain: string;
   summary: string;
   stack: string[];
+  wins?: string[];
 };
 
 export const experience: Role[] = [
@@ -40,8 +41,13 @@ export const experience: Role[] = [
     end: null,
     domain: "Enterprise",
     summary:
-      "Maintain and extend the TWMS, PMS and HR systems from user requirements. Built additional desktop, IoT and internal applications, contributed to AI proof-of-concept work, and resolved VAPT security findings.",
-    stack: [".NET", "Java Spring", "Next.js", "Python", "Kotlin", "AWS", "SQL Server", "JIRA"],
+      "Maintain and extend enterprise systems from user requirements: the Terminal Warehouse (TWMS) and Packaging Management (PMS) systems on Java Spring and RabbitMQ, and the HR System, e-Recruitment and Face Absence Management on ASP.NET. Built AI agents and self-hosted AI tools, desktop and IoT apps, and resolved VAPT security findings.",
+    stack: [".NET", "Java Spring", "RabbitMQ", "Python", "Copilot Studio", "SQL Server", "Next.js", "Kotlin", "AWS", "Azure DevOps"],
+    wins: [
+      "Closed Jira tickets ahead of target",
+      "Upgraded systems from legacy stacks to new ones",
+      "Shipped optimisations and new features quickly",
+    ],
   },
   {
     company: "PT. Saba Semesta Perkasa",
@@ -52,6 +58,11 @@ export const experience: Role[] = [
     summary:
       "Built a web and mobile logistics platform from scratch: real-time tracking, invoicing, master data and role-based access control. Contributed to product planning and kept it performing at production scale.",
     stack: ["Next.js", "React Native", "PostgreSQL", "GraphQL", "Figma"],
+    wins: [
+      "Delivered a new logistics system for PT Tunas Logistik Perkasa",
+      "Tuned for scale, security and performance",
+      "Well documented, so the next team can pick it up",
+    ],
   },
   {
     company: "PT. Mega Harapan Mulia",
@@ -62,6 +73,7 @@ export const experience: Role[] = [
     summary:
       "Developed key features for Kelas.com, Kelas.work and Kelas.Center, working with UI/UX and project teams to deliver scalable, user-focused products.",
     stack: ["Laravel", "AWS", "MySQL", "Figma", "Trello"],
+    wins: ["Hit weekly development targets", "Refactored legacy code into modular, maintainable parts"],
   },
   {
     company: "PT. Finansial Integrasi Teknologi",
@@ -71,7 +83,8 @@ export const experience: Role[] = [
     domain: "Fintech",
     summary:
       "Built a B2B loan and assurance transaction dashboard with clear data summaries for faster decisions, and contributed to planning and design.",
-    stack: ["React", "Node.js", "PostgreSQL"],
+    stack: ["React", "Node.js", "PostgreSQL", "TypeScript"],
+    wins: ["Hit weekly development targets", "Replaced manual paperwork with paperless flows"],
   },
   {
     company: "Desa Karang Bangun",
@@ -93,9 +106,26 @@ export type AIProject = {
   summary: string;
   did: string[];
   stack: string[];
+  latest?: boolean; // featured full-width with a "Latest" badge
 };
 
+// Newest first. The 3D walk shows the first three.
 export const aiWork: AIProject[] = [
+  {
+    title: "Enterprise data agent",
+    pipeline: "question → Copilot agent (GPT-4.1) → SQL Server data → grounded answer",
+    summary:
+      "An AI agent for analysts, managers and business stakeholders that answers from the company's own systems and databases, so decisions rest on real data instead of guesses.",
+    did: [
+      "Built the agent in Microsoft Copilot Studio on GPT-4.1, with knowledge, tools and topics wired to internal data",
+      "Python and SQL Server layer that gives the agent structured data to analyse",
+      "Strict grounding rules: answers come only from internal data, with no outside knowledge or assumptions, and a clear message when data is missing",
+      "Analyses the full dataset instead of samples, tuned for accuracy over speed",
+      "Replies in the user's language, Indonesian or English",
+    ],
+    stack: ["Copilot Studio", "GPT-4.1", "Python", "SQL Server", "Prompt engineering"],
+    latest: true,
+  },
   {
     title: "Private document assistant",
     pipeline: "docs → chunks → embeddings → search → local LLM → answer",
@@ -159,8 +189,8 @@ export const practices = [
   },
   {
     title: "Applied AI",
-    body: "Self-hosted LLMs, RAG, OCR pipelines and computer vision, wired into the apps teams already use.",
-    tags: ["Ollama", "RAG", "YOLO"],
+    body: "AI agents grounded in company data, self-hosted LLMs, RAG, OCR pipelines and computer vision, wired into the apps teams already use.",
+    tags: ["Copilot Studio", "Ollama", "RAG", "YOLO"],
   },
   {
     title: "IoT",

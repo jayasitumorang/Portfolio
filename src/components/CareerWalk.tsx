@@ -683,7 +683,7 @@ export function CareerWalk({ repos }: { repos: RepoLite[] | null }) {
             }),
             x + 0.5, 3.4, SIGN_Z,
           );
-          aiWork.forEach((a, k) => {
+          aiWork.slice(0, 3).forEach((a, k) => {
             const mx = x - 1.25 + k * 1.75;
             mount(
               sign(1.6, 1.25, ac, (g, W) => {
