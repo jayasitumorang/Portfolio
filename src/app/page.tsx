@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cacheLife } from "next/cache";
-import { ARField } from "@/components/ARField";
 import { BuyButton } from "@/components/BuyButton";
 import { SiteNav } from "@/components/SiteNav";
 import { books } from "@/data/books";
@@ -178,7 +177,6 @@ export default async function Home() {
         </section>
       </main>
 
-      <ARField />
       <footer className="wrap footer">
         <span>
           © {year} {profile.name}

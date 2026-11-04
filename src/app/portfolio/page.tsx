@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { cacheLife } from "next/cache";
 import profilePhoto from "@/assets/profile.jpg";
-import { ARField } from "@/components/ARField";
 import { CopyEmail } from "@/components/CopyEmail";
 import { GitHubSection } from "@/components/GitHubSection";
 import { SiteNav } from "@/components/SiteNav";
 import { StackDiagram } from "@/components/StackDiagram";
+import { HarborHero } from "@/components/HarborHero";
 import { aiWork, certifications, education, experience, languages, layers, practices, profile, speaking } from "@/data/profile";
 
 const month = (ym: string) =>
@@ -36,15 +36,8 @@ export default async function Portfolio() {
       <SiteNav tab="portfolio" mode="classic" />
 
       <main id="top" className="page classic">
-        <nav className="wrap jump" aria-label="Sections">
-          <a href="#ai">AI</a>
-          <a href="#work">Work</a>
-          <a href="#projects">Projects</a>
-          <a href="#stack">Stack</a>
-          <a href="#background">Background</a>
-          <a href="#contact">Contact</a>
-        </nav>
-        <section className="wrap hero">
+        <HarborHero />
+        <section id="about" className="wrap hero">
           <div>
             <div className="intro">
               <span className="reticle">
@@ -335,7 +328,6 @@ export default async function Portfolio() {
         </section>
       </main>
 
-      <ARField />
       <footer className="wrap footer">
         <span>
           © {year} {profile.name}
