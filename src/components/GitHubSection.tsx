@@ -1,4 +1,5 @@
 import { getGitHub } from "@/lib/github";
+import { Rewrite } from "@/components/Rewrite";
 import { profile } from "@/data/profile";
 
 const LANG_COLORS: Record<string, string> = {
@@ -19,7 +20,7 @@ export async function GitHubSection() {
       <div className="sec-head">
         <div>
           <span className="label">Projects</span>
-          <h2>Live from GitHub</h2>
+          <Rewrite code="git log --author=jaya --since=forever" prose="Things I made because I couldn&apos;t not" />
         </div>
         <span className="live">
           <span className="dot" aria-hidden /> Updates when I push · checked {fmt(fetchedAt)}

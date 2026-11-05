@@ -6,7 +6,7 @@ import { CopyEmail } from "@/components/CopyEmail";
 import { GitHubSection } from "@/components/GitHubSection";
 import { SiteNav } from "@/components/SiteNav";
 import { StackDiagram } from "@/components/StackDiagram";
-import { HarborHero } from "@/components/HarborHero";
+import { Rewrite } from "@/components/Rewrite";
 import { aiWork, certifications, education, experience, languages, layers, practices, profile, speaking } from "@/data/profile";
 
 const month = (ym: string) =>
@@ -36,8 +36,7 @@ export default async function Portfolio() {
       <SiteNav tab="portfolio" mode="classic" />
 
       <main id="top" className="page classic">
-        <HarborHero />
-        <section id="about" className="wrap hero">
+        <section id="about" className="wrap hero notebook">
           <div>
             <div className="intro">
               <span className="reticle">
@@ -59,6 +58,10 @@ export default async function Portfolio() {
             <h1>
               Jaya Pangihutan <span>Situmorang</span>
             </h1>
+            <Rewrite as="p" className="feel-line" code="while (alive) { write(code); write(story); }" prose="I write code by day, and feelings by night." />
+            <span className="margin-note" aria-hidden>
+              engineer · novelist · art lover
+            </span>
             <p className="lede">{profile.summary}</p>
             <div className="ctas">
               <a className="btn primary" href={`mailto:${profile.email}`}>
@@ -112,7 +115,7 @@ export default async function Portfolio() {
           <div className="sec-head">
             <div>
               <span className="label">AI work</span>
-              <h2>AI built for real teams</h2>
+              <Rewrite code="ai.train({ eyes: true, heart: true })" prose="AI that sees, built with care" />
             </div>
             <p>
               Internal AI tools I designed and built, from agents grounded in company data to open-source models running on
@@ -164,7 +167,7 @@ export default async function Portfolio() {
           <div className="sec-head">
             <div>
               <span className="label">Experience</span>
-              <h2>Where I&apos;ve shipped</h2>
+              <Rewrite code="git log --all --oneline" prose="Where I&apos;ve shipped" />
             </div>
             <p>
               {companies} teams across fintech, logistics, EdTech, GovTech and enterprise, most recently enterprise systems
@@ -218,7 +221,7 @@ export default async function Portfolio() {
           <div className="sec-head">
             <div>
               <span className="label">Toolbox</span>
-              <h2>Every layer of the stack</h2>
+              <Rewrite code="import * as tools from &apos;./every-layer&apos;" prose="Every layer, held by hand" />
             </div>
             <p>I pick the tool the team already runs, and I&apos;m comfortable moving between them.</p>
           </div>
@@ -261,7 +264,7 @@ export default async function Portfolio() {
           <div className="sec-head">
             <div>
               <span className="label">Background</span>
-              <h2>Education, talks and certificates</h2>
+              <Rewrite code="cat ./education ./talks ./certs" prose="Where I learned, and who listened" />
             </div>
             <p>Languages: {languages.join(", ")}.</p>
           </div>
@@ -310,7 +313,7 @@ export default async function Portfolio() {
         <section id="contact" className="wrap">
           <div className="contact">
             <span className="label">Contact</span>
-            <h2>Let&apos;s build something that holds up in production.</h2>
+            <Rewrite code="send(you, &quot;hello&quot;)" prose="Write to me. I read every letter." />
             <p>Have a project, a question, or a talk idea? Email is the fastest way to reach me.</p>
             <div className="email-line" id="email-text">
               {profile.email}
